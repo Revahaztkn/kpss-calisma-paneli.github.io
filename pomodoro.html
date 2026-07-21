@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro — KPSS Çalışma Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;--surface:#0d0d0d;--surface2:#141414;
+    --border:#222;--border2:#2a2a2a;
+    --text:#e8e8e8;--muted:#666;--dim:#3a3a3a;--white:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;}
+  a{color:inherit;}
+
+  .wrap{max-width:960px;margin:0 auto;padding:36px 24px 70px;}
+
+  .back{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-decoration:none;
+    margin-bottom:24px;
+  }
+  .back:hover{color:var(--text);}
+
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  h1{font-weight:700;font-size:clamp(22px,4vw,36px);margin:6px 0 36px;letter-spacing:-0.02em;}
+
+  /* ─── LAYOUT ─── */
+  .main-layout{display:grid;grid-template-columns:1fr 360px;gap:36px;align-items:start;}
+  @media(max-width:820px){.main-layout{grid-template-columns:1fr;}}
+
+  /* ─── TIMER ─── */
+  .timer-card{
+    background: linear-gradient(145deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 56px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .ring{width:240px;height:240px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--text) calc(var(--pct,0)*1%),var(--surface2) 0);transition:background .3s linear;margin:20px 0;}
+  .ring-inner{width:196px;height:196px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  #time{font-weight:700;font-size:52px;font-variant-numeric:tabular-nums;}
+  #phaseLabel{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;}
+
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  button,.btn{font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border-radius:8px;padding:11px 22px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:border-color .12s,background .12s;}
+  button:hover,.btn:hover{border-color:var(--dim);}
+  .btn-primary{background:var(--white);color:#000;border-color:var(--white);}
+  .btn-primary:hover{background:#e0e0e0;border-color:#e0e0e0;}
+  .btn-ghost{background:transparent;color:var(--muted);border-color:var(--border2);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--dim);}
+  button.active{background:var(--text);color:#000;border-color:var(--text);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* ─── STATS ─── */
+  .stats-bar{display:flex;gap:28px;flex-wrap:wrap;padding:18px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:20px 0;width:100%;justify-content:center;}
+  .stat-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .stat-val{font-weight:700;font-size:20px;font-variant-numeric:tabular-nums;}
+  .stat-lbl{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+  /* ─── MODE + PRESET ─── */
+  .controls-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+  .preset-chip{font-family:'DM Mono',monospace;font-size:12px;padding:8px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;transition:border-color .12s;user-select:none;}
+  .preset-chip:hover{border-color:var(--dim);}
+  .preset-chip.active{background:var(--text);color:#000;border-color:var(--text);}
+
+  /* ─── PANEL ─── */
+  .panel{
+    background: linear-gradient(145deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-top: 24px;
+    width:100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .panel h2{font-size:15px;font-weight:700;margin:0 0 14px;}
+  .custom-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+  .custom-row label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
+  .custom-row input[type="number"]{width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;text-align:center;}
+  .custom-row input:focus{outline:none;border-color:var(--dim);}
+
+  /* ─── TASKS ─── */
+  .tasks-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .tasks-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .tasks-header span{color:var(--muted);font-weight:400;font-size:13px;}
+  .tasks-list{list-style:none;margin:0;padding:0;max-height:360px;overflow-y:auto;}
+  .tasks-list::-webkit-scrollbar{width:4px;}
+  .tasks-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  .task-item{display:flex;align-items:center;gap:10px;padding:13px 20px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;transition:background .12s;}
+  .task-item:hover{background:var(--surface2);}
+  .task-item:last-child{border-bottom:none;}
+  .task-check{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+  .task-item.done .task-check{background:var(--text);border-color:var(--text);}
+  .task-item.done .task-check::after{content:'✓';font-size:9px;color:#000;}
+  .task-item.done .task-text{text-decoration:line-through;color:var(--muted);}
+  .task-text{flex:1;}
+  .task-del{opacity:0;color:var(--muted);font-size:16px;transition:opacity .12s;line-height:1;}
+  .task-item:hover .task-del{opacity:1;}
+  .task-del:hover{color:var(--text);}
+
+  .add-task-row{display:flex;gap:8px;padding:12px 20px;border-top:1px solid var(--border);}
+  .add-task-row input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+  .add-task-row input::placeholder{color:var(--muted);}
+  .add-task-row input:focus{outline:none;border-color:var(--dim);}
+  .add-task-row button{padding:9px 16px;}
+
+  /* ─── SESSION LOG ─── */
+  .session-log{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-top:14px;overflow:hidden;}
+  .session-log-header{padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:space-between;}
+  .session-log-header span{font-weight:400;font-size:12px;}
+  .session-items{list-style:none;margin:0;padding:0;max-height:240px;overflow-y:auto;}
+  .session-item{display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border);font-size:13px;}
+  .session-item:last-child{border-bottom:none;}
+  .session-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .session-dot.work{background:var(--text);}
+  .session-dot.break{background:var(--muted);}
+  .session-time{color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;margin-left:auto;}
+
+  /* ─── WEEK SUMMARY ─── */
+  .week-summary{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.8;}
+
+  /* ─── STOP SOUND ─── */
+  .stop-sound{background:rgba(255,255,255,.04)!important;border-color:#3a3a3a!important;color:var(--muted)!important;display:none;}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+
+  /* ─── THEMES ─── */
+  body.theme-sunset {
+    --bg:#1c0e05;--surface:#2b170b;--surface2:#3a2010;
+    --border:#4d2b15;--border2:#663b1e;
+    --text:#ffd3b3;--muted:#a37d63;--dim:#664933;--white:#fff2e6;
+  }
+  body.theme-emerald {
+    --bg:#05160e;--surface:#0a261a;--surface2:#123d2b;
+    --border:#1a543b;--border2:#267352;
+    --text:#ccffd9;--muted:#6da381;--dim:#3a7354;--white:#ebffef;
+  }
+  body.theme-sapphire {
+    --bg:#061124;--surface:#0b1c3a;--surface2:#122950;
+    --border:#1a386b;--border2:#264b8f;
+    --text:#ccd9ff;--muted:#6d84a3;--dim:#3a5a73;--white:#ebeeff;
+  }
+  body.theme-amethyst {
+    --bg:#11061c;--surface:#1e0b2e;--surface2:#2b1142;
+    --border:#3d1b5c;--border2:#542780;
+    --text:#eccdff;--muted:#956da3;--dim:#673a73;--white:#f9ebff;
+  }
+  body.theme-crimson {
+    --bg:#1a0505;--surface:#2b0b0b;--surface2:#3d1212;
+    --border:#541a1a;--border2:#732626;
+    --text:#ffcccc;--muted:#a86d6d;--dim:#753a3a;--white:#ffebeb;
+  }
+  body.theme-light {
+    --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+    --border:#e2e8f0;--border2:#cbd5e1;
+    --text:#0f172a;--muted:#64748b;--dim:#94a3b8;--white:#0f172a;
+  }
+  .theme-dot.active {
+    box-shadow: 0 0 0 2px var(--text) !important;
+  }
+  body.theme-light .btn-primary,
+  body.theme-light .preset-chip.active,
+  body.theme-light .btn-ghost.active,
+  body.theme-light button.active,
+  body.theme-light .task-item.done .task-check::after {
+    color: #ffffff !important;
+  }
+</style>
+</head>
+<body>
+<script src="auth.js"></script>
+<div class="wrap">
+  <a class="back" id="backBtn" href="index.html">← Panele dön</a>
+  
+  <header style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:40px; margin-top:20px;">
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <a href="index.html" style="text-decoration:none; padding:4px 10px; font-size:11px; border-radius:6px; border:1px solid var(--border2); background:var(--surface2); color:var(--muted); display:inline-flex; align-items:center; gap:4px; font-weight:600; transition:all 0.12s;" onmouseover="this.style.color='var(--text)'; this.style.borderColor='var(--dim)';" onmouseout="this.style.color='var(--muted)'; this.style.borderColor='var(--border2)';">🏠 Ana Ekran</a>
+        <div class="eyebrow" style="margin:0;">Odak Aracı</div>
+      </div>
+      <h1 style="margin:6px 0 4px;">Pomodoro</h1>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;" id="headerControlPanel">
+      <!-- Theme Switcher -->
+      <div class="theme-selector" style="display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:30px;">
+        <span style="font-size:11.5px; font-weight:600; color:var(--muted); margin-right:4px;">Tema:</span>
+        <button class="theme-dot active" data-theme="dark" style="width:18px; height:18px; border-radius:50%; background:#0c0c0c; border:1px solid #e8e8e8; cursor:pointer; padding:0; outline:none;" title="Midnight Dark"></button>
+        <button class="theme-dot" data-theme="sunset" style="width:18px; height:18px; border-radius:50%; background:#f97316; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sunset Orange"></button>
+        <button class="theme-dot" data-theme="emerald" style="width:18px; height:18px; border-radius:50%; background:#10b981; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Emerald Forest"></button>
+        <button class="theme-dot" data-theme="sapphire" style="width:18px; height:18px; border-radius:50%; background:#3b82f6; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sapphire Blue"></button>
+        <button class="theme-dot" data-theme="amethyst" style="width:18px; height:18px; border-radius:50%; background:#a855f7; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Amethyst Purple"></button>
+        <button class="theme-dot" data-theme="crimson" style="width:18px; height:18px; border-radius:50%; background:#ef4444; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Crimson Rose"></button>
+        <button class="theme-dot" data-theme="light" style="width:18px; height:18px; border-radius:50%; background:#ffffff; border:1px solid #cbd5e1; cursor:pointer; padding:0; outline:none;" title="Beyaz Tema"></button>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- SOL: ZAMANLAYICI -->
+    <div>
+      <div class="timer-card">
+        <div class="ring" id="ring">
+          <div class="ring-inner">
+            <span id="time">25:00</span>
+            <span id="phaseLabel">Hazır</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="startBtn">Başlat</button>
+          <button class="btn-ghost" id="resetBtn">Sıfırla</button>
+          <button class="btn-ghost" id="saveBtn" style="border-color:#3a3a3a; color:var(--text);">Kaydet</button>
+          <button class="btn-ghost stop-sound" id="stopSoundBtn">Sesi Kapat</button>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat-item"><span class="stat-val" id="st-today">0 dk 0 sn</span><span class="stat-lbl">Bugün</span></div>
+          <div class="stat-item"><span class="stat-val" id="st-total">0 dk 0 sn</span><span class="stat-lbl">Toplam</span></div>
+          <div class="stat-item"><span class="stat-val" id="st-work">0 dk 0 sn</span><span class="stat-lbl">Çalışma</span></div>
+          <div class="stat-item"><span class="stat-val" id="st-break">0 dk 0 sn</span><span class="stat-lbl">Mola</span></div>
+        </div>
+
+        <div class="controls-row" id="modeRow">
+          <button class="active" data-type="work" id="modeWork">Çalışma</button>
+          <button data-type="short" id="modeShort">Kısa Mola</button>
+          <button data-type="long" id="modeLong">Uzun Mola</button>
+        </div>
+
+        <!-- Özel dk Girişi -->
+        <div class="custom-row" style="margin-top: 14px; gap: 8px; justify-content: center; width: 100%;">
+          <label style="font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; user-select: none;">
+            Özel dk:
+            <input type="number" id="customMin" min="1" max="180" value="25" style="width: 60px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; text-align: center;">
+          </label>
+          <button class="btn-primary" id="applyCustom" style="padding: 4px 12px; font-size: 12px; border-radius: 6px;">Uygula</button>
+        </div>
+
+        <!-- Hazır Değerler -->
+        <div class="controls-row" id="presetRow" style="margin-top: 14px;">
+          <span class="preset-chip" data-min="5">5 dk</span>
+          <span class="preset-chip" data-min="10">10 dk</span>
+          <span class="preset-chip" data-min="15">15 dk</span>
+          <span class="preset-chip" data-min="20">20 dk</span>
+          <span class="preset-chip active" data-min="25">25 dk</span>
+          <span class="preset-chip" data-min="30">30 dk</span>
+          <span class="preset-chip" data-min="35">35 dk</span>
+          <span class="preset-chip" data-min="40">40 dk</span>
+        </div>
+      </div>
+
+      <!-- SAYAÇ YÖNÜ -->
+      <div class="panel">
+        <h2>Sayaç Yönü</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 12px;">Zamanlayıcının ileri mi yoksa geri mi sayacağını seçin.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button id="dirDownBtn" class="btn active">Geriye Doğru (25:00 → 00:00)</button>
+          <button id="dirUpBtn" class="btn">İleriye Doğru (00:00 → 25:00)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ: SEANSLAR & UTILITIES -->
+    <div>
+      <div class="session-log">
+        <div class="session-log-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Bugünkü seanslar <span id="sessionCount">0 seans</span></span>
+          <button class="btn-ghost" id="exportSessionsBtn" style="font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer;">📊 Excel'e Aktar</button>
+        </div>
+        <ul class="session-items" id="sessionList"></ul>
+      </div>
+
+      <!-- MİNİ PENCERE -->
+      <div class="panel" style="margin-top:20px;">
+        <h2>Mini Pencere</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 12px;">Diğer sekmelerin veya uygulamaların üzerinde açık kalır. Chrome/Edge güncel sürümlerde çalışır.</p>
+        <button class="btn" id="pipBtn" style="width:100%;">🗗 Mini Pencere Aç</button>
+      </div>
+
+      <!-- ALARM SESİ -->
+      <div class="panel" style="margin-top:20px;">
+        <h2>Alarm Sesi</h2>
+        <div style="display:flex;gap:10px;flex-direction:column;align-items:stretch;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <select id="soundSelect" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;">
+              <option value="kitchen">Alarm 1 (Uyarı)</option>
+              <option value="bell">Alarm 2 (Zil / Çan Sesi)</option>
+              <option value="bird">Alarm 3 (Kuş Sesi)</option>
+              <option value="digital">Alarm 4 (Dijital Sinyal)</option>
+              <option value="yok">Sessiz</option>
+            </select>
+            <button class="btn-ghost" id="testSoundBtn">Test</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:12px;color:var(--muted);width:32px;">Ses</span>
+            <input type="range" id="volSlider" min="0" max="100" value="70" style="flex:1;accent-color:var(--text);cursor:pointer;">
+            <span id="volVal" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);width:36px;text-align:right;">70%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);">
+    <span>Eğer çalışmazsan SÜRÜNECEKSİN</span>
+    <span style="font-size: 11px; color: var(--dim);">Site <a href="https://www.linkedin.com/in/revaztkn/" target="_blank" rel="noopener noreferrer" style="color: var(--muted); text-decoration: underline; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">Revaha</a> tarafından tasarlanmıştır</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════ DURUM ═══════ */
+let totalSec=25*60,remain=25*60,running=false,handle=null,pipWin=null;
+let mode='work',volume=70;
+let todaySec=0,totalSecAll=0,workSec=0,breakSec=0;
+let timerDirection='down';
+
+const timeEl=document.getElementById('time');
+const phaseEl=document.getElementById('phaseLabel');
+const ringEl=document.getElementById('ring');
+const startBtn=document.getElementById('startBtn');
+const resetBtn=document.getElementById('resetBtn');
+const saveBtn=document.getElementById('saveBtn');
+const stopSoundBtn=document.getElementById('stopSoundBtn');
+const dirDownBtn=document.getElementById('dirDownBtn');
+const dirUpBtn=document.getElementById('dirUpBtn');
+
+function pad(n){return String(n).padStart(2,'0');}
+
+/* ═══════ GÖRÜNTÜ ═══════ */
+function render(){
+  let displaySec = remain;
+  if (timerDirection === 'up') {
+    displaySec = totalSec - remain;
+  }
+  const m=Math.floor(displaySec/60),s=displaySec%60;
+  timeEl.textContent=pad(m)+':'+pad(s);
+  const pct=totalSec>0?((totalSec-remain)/totalSec)*100:0;
+  ringEl.style.setProperty('--pct',pct.toFixed(2));
+  phaseEl.textContent=running?'Çalışıyor':remain===totalSec?'Hazır':'Duraklatıldı';
+  startBtn.textContent=running?'Duraklat':'Başlat';
+  if(pipWin&&!pipWin.closed){
+    const pt=pipWin.document.getElementById('pipTime');
+    const pp=pipWin.document.getElementById('pipPhase');
+    const pr=pipWin.document.getElementById('pipRing');
+    const ps=pipWin.document.getElementById('pipToggle');
+    if(pt)pt.textContent=pad(m)+':'+pad(s);
+    if(pp)pp.textContent=phaseEl.textContent;
+    if(pr)pr.style.background='conic-gradient(#e8e8e8 ' + pct.toFixed(2) + '%, #141414 0)';
+    if(ps)ps.textContent=running?'Duraklat':'Başlat';
+  }
+}
+
+/* ═══════ ZAMANLAYICI ═══════ */
+let workStartRemain = remain;
+function savePomoState() {
+  localStorage.setItem('kpss_pomo_state', JSON.stringify({
+    remain: remain,
+    total: totalSec,
+    running: running,
+    mode: mode,
+    updatedAt: Date.now()
+  }));
+}
+function loadPomoState() {
+  try {
+    const raw = localStorage.getItem('kpss_pomo_state');
+    if (raw) {
+      const state = JSON.parse(raw);
+      totalSec = state.total || 1500;
+      mode = state.mode || 'work';
+      let curRemain = state.remain;
+      if (state.running) {
+        const diff = Math.floor((Date.now() - state.updatedAt) / 1000);
+        curRemain = Math.max(0, curRemain - diff);
+      }
+      remain = curRemain;
+      running = state.running;
+      workStartRemain = remain;
+      
+      document.querySelectorAll('#modeRow button').forEach(b => {
+        b.classList.toggle('active', b.dataset.type === mode);
+      });
+      
+      const min = Math.round(totalSec / 60);
+      document.querySelectorAll('.preset-chip').forEach(c => {
+        c.classList.toggle('active', Number(c.dataset.min) === min);
+      });
+      
+      if (running && remain > 0) {
+        if (!handle) handle = setInterval(tick, 1000);
+      } else {
+        clearInterval(handle);
+        handle = null;
+        running = false;
+      }
+      render();
+    }
+  } catch(e) {}
+}
+function autoSaveSession() {
+  const elapsed = workStartRemain - remain;
+  if (elapsed >= 5) {
+    addSession(mode, elapsed);
+    workStartRemain = remain;
+    savePomoState();
+  }
+}
+function tick(){
+  remain--;
+  savePomoState();
+  if(remain<=0){
+    remain=0;
+    stopTimer();
+    playAlarm_();
+    addSession(mode, workStartRemain);
+    workStartRemain = 0;
+    savePomoState();
+    return;
+  }
+  render();
+}
+function startTimer(){
+  if(running)return;
+  if(remain<=0) {
+    remain=totalSec;
+    workStartRemain=totalSec;
+  }
+  running=true;
+  handle=setInterval(tick,1000);
+  savePomoState();
+  render();
+}
+function stopTimer(){
+  running=false;
+  clearInterval(handle);
+  handle=null;
+  autoSaveSession();
+  savePomoState();
+  render();
+}
+function toggleTimer(){running?stopTimer():startTimer();}
+function resetTimer(){
+  stopTimer();
+  remain=totalSec;
+  workStartRemain=totalSec;
+  stopAlarm();
+  savePomoState();
+  render();
+}
+startBtn.addEventListener('click',toggleTimer);
+resetBtn.addEventListener('click',resetTimer);
+
+saveBtn.addEventListener('click', () => {
+  const elapsed = workStartRemain - remain;
+  if (elapsed < 5) {
+    alert("Kaydetmek için en az 5 saniye çalışmış veya dinlenmiş olmalısınız.");
+    return;
+  }
+  addSession(mode, elapsed);
+  workStartRemain = remain;
+  savePomoState();
+  resetTimer();
+});
+
+dirDownBtn.addEventListener('click', () => {
+  timerDirection = 'down';
+  dirDownBtn.classList.add('active');
+  dirUpBtn.classList.remove('active');
+  localStorage.setItem('kpss_pomo_dir', 'down');
+  render();
+});
+
+dirUpBtn.addEventListener('click', () => {
+  timerDirection = 'up';
+  dirUpBtn.classList.add('active');
+  dirDownBtn.classList.remove('active');
+  localStorage.setItem('kpss_pomo_dir', 'up');
+  render();
+});
+
+/* ═══════ MOD + PRESET ═══════ */
+function setMode(type,min){
+  autoSaveSession();
+  mode=type;
+  document.querySelectorAll('#modeRow button').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
+  totalSec=min*60;remain=totalSec;
+  workStartRemain=totalSec;
+  stopTimer();stopAlarm();
+  savePomoState();
+  render();
+  document.querySelectorAll('.preset-chip').forEach(c=>c.classList.toggle('active',Number(c.dataset.min)===min));
+}
+document.getElementById('modeWork').addEventListener('click',()=>setMode('work',25));
+document.getElementById('modeShort').addEventListener('click',()=>setMode('short',5));
+document.getElementById('modeLong').addEventListener('click',()=>setMode('long',15));
+document.getElementById('presetRow').addEventListener('click',e=>{
+  const chip=e.target.closest('.preset-chip');
+  if(!chip)return;
+  const min=Number(chip.dataset.min);
+  setMode(mode, min);
+});
+document.getElementById('applyCustom').addEventListener('click',()=>{
+  const v=Math.max(1,Math.min(180,Number(document.getElementById('customMin').value)||Math.round(totalSec / 60)));
+  setMode(mode, v);
+});
+
+/* ═══════ ALARM ═══════ */
+let alarmAudio = null;
+let alarmRunning = false;
+
+function playAlarm_() {
+  alarmRunning = true;
+  stopSoundBtn.style.display = 'inline-block';
+  const style = document.getElementById('soundSelect').value;
+  if (style === 'yok') return;
+  
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+  }
+  
+  let src = "";
+  if (style === 'bell') src = 'audio/alarm2-can.mp3';
+  else if (style === 'bird') src = 'audio/alarm2kus.mp3';
+  else if (style === 'digital') src = 'audio/alarm3-digital.mp3';
+  else if (style === 'kitchen') src = 'audio/alarm1 sesli.mp3';
+  else return;
+  
+  alarmAudio = new Audio(src);
+  alarmAudio.loop = true;
+  alarmAudio.volume = volume / 100;
+  alarmAudio.play().catch(e => console.log("Alarm play failed:", e));
+}
+
+function stopAlarm() {
+  alarmRunning = false;
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+  }
+  stopSoundBtn.style.display = 'none';
+  const testBtn = document.getElementById('testSoundBtn');
+  if (testBtn) testBtn.textContent = 'Test';
+}
+
+stopSoundBtn.addEventListener('click', stopAlarm);
+
+document.getElementById('testSoundBtn').addEventListener('click', () => {
+  if (alarmRunning) {
+    stopAlarm();
+  } else {
+    playAlarm_();
+    document.getElementById('testSoundBtn').textContent = 'Durdur';
+  }
+});
+
+const volSlider=document.getElementById('volSlider');
+const volVal=document.getElementById('volVal');
+volSlider.addEventListener('input',()=>{
+  volume=Number(volSlider.value);
+  volVal.textContent=volume+'%';
+  localStorage.setItem('kpss_vol',volume);
+  if (alarmAudio) {
+    alarmAudio.volume = volume / 100;
+  }
+});
+document.getElementById('soundSelect').addEventListener('change', () => {
+  localStorage.setItem('kpss_sound', soundSelect.value);
+  if (alarmRunning) {
+    playAlarm_();
+  }
+});
+(function(){
+  const v=localStorage.getItem('kpss_vol');if(v){volume=Number(v);volSlider.value=volume;volVal.textContent=volume+'%';}
+  const s=localStorage.getItem('kpss_sound');if(s)document.getElementById('soundSelect').value=s;
+  const d = localStorage.getItem('kpss_pomo_dir') || 'down';
+  timerDirection = d;
+  if (d === 'up') {
+    dirUpBtn.classList.add('active');
+    dirDownBtn.classList.remove('active');
+  } else {
+    dirDownBtn.classList.add('active');
+    dirUpBtn.classList.remove('active');
+  }
+  loadPomoState();
+})();
+window.addEventListener('focus', loadPomoState);
+
+/* ═══════ STATS ═══════ */
+function formatTimeSec(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ' dk ' + s + ' sn';
+}
+function loadStats(){
+  try{const d=JSON.parse(localStorage.getItem('kpss_pomo_stats_v3')||'{}');
+    todaySec=d.todaySec||0;totalSecAll=d.totalSecAll||0;
+    workSec=d.workSec||0;breakSec=d.breakSec||0;
+  }catch(e){}
+}
+function saveStats(){localStorage.setItem('kpss_pomo_stats_v3',JSON.stringify({todaySec,totalSecAll,workSec,breakSec}));}
+function refreshStats(){
+  document.getElementById('st-today').textContent=formatTimeSec(todaySec);
+  document.getElementById('st-total').textContent=formatTimeSec(totalSecAll);
+  document.getElementById('st-work').textContent=formatTimeSec(workSec);
+  document.getElementById('st-break').textContent=formatTimeSec(breakSec);
+}
+function addSession(m,elapsedSeconds){
+  const secs = (elapsedSeconds !== undefined) ? elapsedSeconds : totalSec;
+  if(m==='work'){
+    todaySec+=secs;totalSecAll+=secs;workSec+=secs;
+    const today=new Date().toDateString();
+    const last=localStorage.getItem('kpss_pomo_lastdate');
+    if(last!==today){todaySec=secs;localStorage.setItem('kpss_pomo_lastdate',today);}
+    saveStats();refreshStats();
+  } else {
+    breakSec+=secs;saveStats();refreshStats();
+  }
+  logSession(m,secs);
+}
+loadStats();refreshStats();
+
+/* ═══════ SESSION LOG ═══════ */
+window.deleteSession = function(id) {
+  try {
+    let sessions = JSON.parse(localStorage.getItem('kpss_pomo_sess_v3') || '[]');
+    const targetSession = sessions.find(s => s.id === id);
+    if (!targetSession) return;
+    
+    const secs = targetSession.secs || 0;
+    const mode = targetSession.mode;
+    
+    let stats = JSON.parse(localStorage.getItem('kpss_pomo_stats_v3') || '{}');
+    let tSec = stats.todaySec || 0;
+    let tAll = stats.totalSecAll || 0;
+    let wSec = stats.workSec || 0;
+    let bSec = stats.breakSec || 0;
+    
+    if (mode === 'work') {
+      tSec = Math.max(0, tSec - secs);
+      tAll = Math.max(0, tAll - secs);
+      wSec = Math.max(0, wSec - secs);
+    } else {
+      bSec = Math.max(0, bSec - secs);
+    }
+    
+    todaySec = tSec;
+    totalSecAll = tAll;
+    workSec = wSec;
+    breakSec = bSec;
+    
+    localStorage.setItem('kpss_pomo_stats_v3', JSON.stringify({
+      todaySec,
+      totalSecAll,
+      workSec,
+      breakSec
+    }));
+    
+    sessions = sessions.filter(s => s.id !== id);
+    localStorage.setItem('kpss_pomo_sess_v3', JSON.stringify(sessions));
+    
+    refreshStats();
+    loadSessions();
+  } catch(e) {
+    console.error(e);
+  }
+};
+
+function logSession(m,secs){
+  const now=new Date(),time=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  const list=document.getElementById('sessionList');
+  const item=document.createElement('li');item.className='session-item';
+  const labels={work:'Çalışma',short:'Kısa mola',long:'Uzun mola'};
+  const newId = Date.now() + "_" + Math.floor(Math.random() * 1000000);
+  item.innerHTML=`<span class="session-dot ${m}"></span><span>${labels[m]||m} (${formatTimeSec(secs)})</span><span class="session-time">${time}</span><button class="remove-x" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:14px; padding:0 4px; display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s; margin-left:8px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="deleteSession('${newId}')">&times;</button>`;
+  list.insertBefore(item,list.firstChild);
+  document.getElementById('sessionCount').textContent=list.children.length+' seans';
+  try{
+    const sessions=JSON.parse(localStorage.getItem('kpss_pomo_sess_v3')||'[]');
+    sessions.push({id:newId,date:now.toDateString(),time,mode:m,secs:secs});
+    if(sessions.length>200)sessions.splice(0,sessions.length-200);
+    localStorage.setItem('kpss_pomo_sess_v3',JSON.stringify(sessions));
+  }catch(e){}
+}
+function loadSessions(){
+  try{
+    let sessions=JSON.parse(localStorage.getItem('kpss_pomo_sess_v3')||'[]');
+    let modified = false;
+    sessions.forEach(s => {
+      if (!s.id) {
+        s.id = Date.now() + "_" + Math.floor(Math.random() * 1000000);
+        modified = true;
+      }
+    });
+    if (modified) {
+      localStorage.setItem('kpss_pomo_sess_v3', JSON.stringify(sessions));
+    }
+    
+    const today=new Date().toDateString();
+    const list=document.getElementById('sessionList');
+    list.innerHTML='';
+    sessions.filter(s=>s.date===today).forEach(s=>{
+      const item=document.createElement('li');item.className='session-item';
+      const labels={work:'Çalışma',short:'Kısa mola',long:'Uzun mola'};
+      const secsStr=s.secs?` (${formatTimeSec(s.secs)})`:'';
+      item.innerHTML=`<span class="session-dot ${s.mode}"></span><span>${labels[s.mode]||s.mode}${secsStr}</span><span class="session-time">${s.time}</span><button class="remove-x" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:14px; padding:0 4px; display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s; margin-left:8px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="deleteSession('${s.id}')">&times;</button>`;
+      list.appendChild(item);
+    });
+    document.getElementById('sessionCount').textContent=list.children.length+' seans';
+  }catch(e){}
+}
+loadSessions();
+
+/* ═══════ MİNİ PENCERE ═══════ */
+async function openPip(){
+  if(pipWin&&!pipWin.closed){pipWin.focus();return;}
+  if(!('documentPictureInPicture' in window)){alert('Tarayıcı desteklemiyor. Chrome/Edge güncel sürüm kullan.');return;}
+  pipWin=await window.documentPictureInPicture.requestWindow({width:270,height:280});
+  [...document.styleSheets].forEach(s=>{try{const rules=[...s.cssRules].map(r=>r.cssText).join('\n');const st=pipWin.document.createElement('style');st.textContent=rules;pipWin.document.head.appendChild(st);}catch(e){}});
+  pipWin.document.body.style.cssText='margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;font-family:DM Sans,sans-serif;color:#e8e8e8;';
+  
+  let displaySec = remain;
+  if (timerDirection === 'up') {
+    displaySec = totalSec - remain;
+  }
+  const m=Math.floor(displaySec/60),s=displaySec%60;
+  const pct=totalSec>0?((totalSec-remain)/totalSec)*100:0;
+  
+  pipWin.document.body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;">
+    <div id="pipRing" style="width:100px;height:100px;border-radius:50%;background:conic-gradient(#e8e8e8 ${pct}%,#141414 0);display:flex;align-items:center;justify-content:center;transition:background .3s;cursor:pointer;" title="Başlat / Duraklat">
+      <div style="width:80px;height:80px;border-radius:50%;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+        <span id="pipTime" style="font-weight:700;font-size:18px;">${pad(m)}:${pad(s)}</span>
+        <span id="pipPhase" style="font-size:8px;color:#666;text-transform:uppercase;margin-top:1px;">${phaseEl.textContent}</span>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:6px;width:100%;">
+      <button id="pipWork" style="flex:1;padding:6px;background:#a855f7;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:11px;">Çalışma</button>
+      <button id="pipShort" style="flex:1;padding:6px;background:#6366f1;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:11px;">Kısa Mola</button>
+    </div>
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;border-top:1px solid #111;padding-top:6px;margin-top:2px;">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" id="pipCustomMin" min="1" max="180" style="width:42px;background:#111;border:1px solid #222;border-radius:4px;color:#fff;font-size:11px;text-align:center;padding:2px 0;" value="${Math.round(totalSec / 60)}">
+        <button id="pipApplyCustom" style="padding:2px 6px;background:#222;color:#fff;border:1px solid #333;border-radius:4px;font-size:9.5px;font-weight:600;cursor:pointer;">Uygula</button>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button id="pipToggle" style="padding:3px 8px;background:#fff;color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;">${running?'Duraklat':'Başlat'}</button>
+        <button id="pipReset" style="padding:3px 6px;background:#111;color:#fff;border:1px solid #222;border-radius:4px;font-size:10px;cursor:pointer;">Sıfırla</button>
+      </div>
+    </div>
+  </div>`;
+  
+  pipWin.document.getElementById('pipWork').addEventListener('click', () => {
+    setMode('work', 25);
+  });
+  pipWin.document.getElementById('pipShort').addEventListener('click', () => {
+    setMode('short', 5);
+  });
+  pipWin.document.getElementById('pipApplyCustom').addEventListener('click', () => {
+    const inputVal = Number(pipWin.document.getElementById('pipCustomMin').value) || 25;
+    const cleanVal = Math.max(1, Math.min(180, inputVal));
+    setMode(mode, cleanVal);
+  });
+  
+  pipWin.document.getElementById('pipToggle').addEventListener('click', toggleTimer);
+  pipWin.document.getElementById('pipRing').addEventListener('click', toggleTimer);
+  pipWin.document.getElementById('pipReset').addEventListener('click', resetTimer);
+  pipWin.addEventListener('pagehide',()=>{pipWin=null;});
+}
+document.getElementById('pipBtn').addEventListener('click',openPip);
+
+
+
+/* ═══════ BAŞLAT ═══════ */
+render();
+
+// Theme Manager
+document.querySelectorAll('.theme-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.body.className = '';
+    const theme = dot.dataset.theme;
+    if (theme !== 'dark') {
+      document.body.classList.add('theme-' + theme);
+    }
+    localStorage.setItem('kpss_user_theme', theme);
+    document.querySelectorAll('.theme-dot').forEach(d => {
+      d.style.borderColor = (d === dot) ? '#e8e8e8' : '#222';
+      d.classList.toggle('active', d === dot);
+    });
+  });
+});
+(function loadTheme() {
+  const saved = localStorage.getItem('kpss_user_theme') || 'dark';
+  const dot = document.querySelector(`.theme-dot[data-theme="${saved}"]`);
+  if (dot) dot.click();
+})();
+
+
+// CSV Export System
+function downloadCSV(filename, headers, rows) {
+  const delimiter = ";";
+  const clean = val => {
+    if (val === null || val === undefined) return '';
+    let str = String(val);
+    str = str.replace(/"/g, '""');
+    if (str.includes(delimiter) || str.includes('\n') || str.includes('"')) {
+      str = `"${str}"`;
+    }
+    return str;
+  };
+  
+  let csvContent = headers.map(clean).join(delimiter) + "\r\n";
+  rows.forEach(row => {
+    csvContent += row.map(clean).join(delimiter) + "\r\n";
+  });
+  
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+document.getElementById('exportSessionsBtn').addEventListener('click', () => {
+  try {
+    const sessions = JSON.parse(localStorage.getItem('kpss_pomo_sess_v3') || '[]');
+    if (sessions.length === 0) {
+      alert("Dışa aktarılacak seans kaydı bulunmamaktadır.");
+      return;
+    }
+    
+    const headers = ["Tarih", "Saat", "Mod", "Süre (Saniye)", "Süre (Dakika)"];
+    const rows = sessions.map(s => {
+      const modeLabel = s.mode === 'work' ? 'Çalışma' : (s.mode === 'short' ? 'Kısa Mola' : 'Uzun Mola');
+      const minutes = (s.secs / 60).toFixed(1);
+      return [s.date, s.time, modeLabel, s.secs, minutes];
+    });
+    
+    downloadCSV("kpss_pomodoro_seanslari.csv", headers, rows);
+  } catch(e) {
+    alert("Hata: " + e.message);
+  }
+});
+</script>
+</body>
+</html>

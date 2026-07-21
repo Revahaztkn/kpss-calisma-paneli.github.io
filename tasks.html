@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haftalık Çalışma & Soru Takip Paneli · KPSS Çalışma Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050505;
+    --surface: #0c0c0c;
+    --surface2: #141414;
+    --border: #1a1a1a;
+    --border2: #282828;
+    --text: #e8e8e8;
+    --white: #ffffff;
+    --muted: #666666;
+    --dim: #a0a0a0;
+    
+    /* Subject Colors */
+    --color-turkce: #ef4444;      /* Red */
+    --color-matematik: #3b82f6;   /* Blue */
+    --color-tarih: #f97316;       /* Orange */
+    --color-cografya: #22c55e;    /* Green */
+    --color-vatandaslik: #a855f7;  /* Purple */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.5;
+    padding: 40px 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  
+  /* Breadcrumb & Navigation */
+  .back {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    transition: color 0.15s ease;
+  }
+  .back:hover { color: var(--text); }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    margin-bottom: 30px;
+  }
+
+  /* Layout */
+  .grid-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .grid-layout { grid-template-columns: 1fr; }
+  }
+
+  /* Card / Panel Styles */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .panel-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Form Elements */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+  .form-control, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    transition: border-color 0.12s ease;
+  }
+  .form-control:focus, select:focus {
+    outline: none;
+    border-color: var(--dim);
+  }
+  
+  /* Button Styles */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    width: 100%;
+  }
+  .btn:hover {
+    border-color: var(--dim);
+    color: var(--white);
+  }
+  .btn-primary {
+    background: var(--white);
+    color: var(--bg);
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #e0e0e0;
+  }
+  .btn-archive {
+    background: transparent;
+    border: 1px solid #2e2e2e;
+    color: var(--dim);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.12s ease;
+  }
+  .btn-archive:hover {
+    background: var(--white);
+    color: var(--bg);
+    border-color: var(--white);
+  }
+
+  /* Weekly Board Styling */
+  .weekly-board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 1100px) {
+    .weekly-board { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .weekly-board { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .weekly-board { grid-template-columns: 1fr; }
+  }
+
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    position: relative;
+    transition: border-color 0.15s ease;
+  }
+  .day-card.today {
+    border-color: var(--border2);
+    background: rgba(255,255,255,0.01);
+  }
+  .day-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .day-total {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  
+  /* Log Entry List inside Day Card */
+  .log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .log-item {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: all 0.12s ease;
+  }
+  .log-item:hover {
+    border-color: var(--border2);
+  }
+  .log-subject {
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .log-topic {
+    color: var(--text);
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 14px;
+  }
+  .log-questions {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 1px;
+  }
+  .log-del-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.1s ease;
+  }
+  .log-del-btn:hover { color: var(--white); }
+
+  /* Study Schedule Item Design */
+  .schedule-item {
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.12s ease;
+  }
+  .schedule-item:hover {
+    border-color: var(--border2);
+  }
+  .schedule-text {
+    flex: 1;
+    margin-left: 8px;
+    font-size: 11.5px;
+  }
+  .schedule-item.done .schedule-text {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .schedule-check {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .schedule-item.done .schedule-check {
+    background: var(--text);
+    border-color: var(--text);
+  }
+  .schedule-item.done .schedule-check::after {
+    content: '✓';
+    color: #000;
+    font-size: 9px;
+    font-weight: bold;
+  }
+
+  /* Color Codes Helper Panel */
+  .color-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Archive List */
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .archive-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .archive-item:hover {
+    border-color: var(--border2);
+    background: rgba(255,255,255,0.02);
+  }
+  .archive-name {
+    font-weight: 700;
+    color: var(--white);
+  }
+  .archive-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  /* Custom Colors for badges & items */
+  .c-turkce { color: var(--color-turkce); }
+  .c-matematik { color: var(--color-matematik); }
+  .c-tarih { color: var(--color-tarih); }
+  .c-cografya { color: var(--color-cografya); }
+  .c-vatandaslik { color: var(--color-vatandaslik); }
+
+  .bg-turkce { background: var(--color-turkce); }
+  .bg-matematik { background: var(--color-matematik); }
+  .bg-tarih { background: var(--color-tarih); }
+  .bg-cografya { background: var(--color-cografya); }
+  .bg-vatandaslik { background: var(--color-vatandaslik); }
+  
+  .border-turkce { border-left: 3px solid var(--color-turkce) !important; }
+  .border-matematik { border-left: 3px solid var(--color-matematik) !important; }
+  .border-tarih { border-left: 3px solid var(--color-tarih) !important; }
+  .border-cografya { border-left: 3px solid var(--color-cografya) !important; }
+  .border-vatandaslik { border-left: 3px solid var(--color-vatandaslik) !important; }
+
+  /* ─── THEMES ─── */
+  body.theme-sunset {
+    --bg:#1c0e05;--surface:#2b170b;--surface2:#3a2010;
+    --border:#4d2b15;--border2:#663b1e;
+    --text:#ffd3b3;--muted:#a37d63;--dim:#664933;--white:#fff2e6;
+  }
+  body.theme-emerald {
+    --bg:#05160e;--surface:#0a261a;--surface2:#123d2b;
+    --border:#1a543b;--border2:#267352;
+    --text:#ccffd9;--muted:#6da381;--dim:#3a7354;--white:#ebffef;
+  }
+  body.theme-sapphire {
+    --bg:#061124;--surface:#0b1c3a;--surface2:#122950;
+    --border:#1a386b;--border2:#264b8f;
+    --text:#ccd9ff;--muted:#6d84a3;--dim:#3a5a73;--white:#ebeeff;
+  }
+  body.theme-amethyst {
+    --bg:#11061c;--surface:#1e0b2e;--surface2:#2b1142;
+    --border:#3d1b5c;--border2:#542780;
+    --text:#eccdff;--muted:#956da3;--dim:#673a73;--white:#f9ebff;
+  }
+  body.theme-crimson {
+    --bg:#1a0505;--surface:#2b0b0b;--surface2:#3d1212;
+    --border:#541a1a;--border2:#732626;
+    --text:#ffcccc;--muted:#a86d6d;--dim:#753a3a;--white:#ffebeb;
+  }
+  body.theme-light {
+    --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+    --border:#e2e8f0;--border2:#cbd5e1;
+    --text:#0f172a;--muted:#64748b;--dim:#94a3b8;--white:#0f172a;
+  }
+  .theme-dot.active {
+    box-shadow: 0 0 0 2px var(--text) !important;
+  }
+  body.theme-light .btn-primary,
+  body.theme-light .preset-chip.active,
+  body.theme-light .btn-ghost.active,
+  body.theme-light button.active,
+  body.theme-light .task-item.done .task-check::after {
+    color: #ffffff !important;
+  }
+</style>
+</head>
+<body>
+<script src="auth.js"></script>
+<div class="wrap">
+  <a class="back" href="index.html">← Panele dön</a>
+  
+  <header style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:40px; margin-top:20px;">
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <a href="index.html" style="text-decoration:none; padding:4px 10px; font-size:11px; border-radius:6px; border:1px solid var(--border2); background:var(--surface2); color:var(--muted); display:inline-flex; align-items:center; gap:4px; font-weight:600; transition:all 0.12s;" onmouseover="this.style.color='var(--text)'; this.style.borderColor='var(--dim)';" onmouseout="this.style.color='var(--muted)'; this.style.borderColor='var(--border2)';">🏠 Ana Ekran</a>
+        <div class="eyebrow" style="margin:0;">Haftalık Çalışma Takipçisi</div>
+      </div>
+      <h1 style="margin:6px 0 4px;">Günlük Görevler & Soru Takip Paneli</h1>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;" id="headerControlPanel">
+      <!-- Theme Switcher -->
+      <div class="theme-selector" style="display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:30px;">
+        <span style="font-size:11.5px; font-weight:600; color:var(--muted); margin-right:4px;">Tema:</span>
+        <button class="theme-dot active" data-theme="dark" style="width:18px; height:18px; border-radius:50%; background:#0c0c0c; border:1px solid #e8e8e8; cursor:pointer; padding:0; outline:none;" title="Midnight Dark"></button>
+        <button class="theme-dot" data-theme="sunset" style="width:18px; height:18px; border-radius:50%; background:#f97316; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sunset Orange"></button>
+        <button class="theme-dot" data-theme="emerald" style="width:18px; height:18px; border-radius:50%; background:#10b981; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Emerald Forest"></button>
+        <button class="theme-dot" data-theme="sapphire" style="width:18px; height:18px; border-radius:50%; background:#3b82f6; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sapphire Blue"></button>
+        <button class="theme-dot" data-theme="amethyst" style="width:18px; height:18px; border-radius:50%; background:#a855f7; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Amethyst Purple"></button>
+        <button class="theme-dot" data-theme="crimson" style="width:18px; height:18px; border-radius:50%; background:#ef4444; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Crimson Rose"></button>
+        <button class="theme-dot" data-theme="light" style="width:18px; height:18px; border-radius:50%; background:#ffffff; border:1px solid #cbd5e1; cursor:pointer; padding:0; outline:none;" title="Beyaz Tema"></button>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="grid-layout">
+    
+    <!-- SOL KOLON: EKLEME PANELİ -->
+    <div>
+      <!-- Soru Kaydetme -->
+      <div class="panel">
+        <div class="panel-title">Soru Çözümü Ekle</div>
+        
+        <div class="form-group">
+          <label for="daySelect">GÜN</label>
+          <select id="daySelect">
+            <option value="Pazartesi">Pazartesi</option>
+            <option value="Salı">Salı</option>
+            <option value="Çarşamba">Çarşamba</option>
+            <option value="Perşembe">Perşembe</option>
+            <option value="Cuma">Cuma</option>
+            <option value="Cumartesi">Cumartesi</option>
+            <option value="Pazar">Pazar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="subjectSelect">DERS</label>
+          <select id="subjectSelect">
+            <option value="Türkçe">Türkçe</option>
+            <option value="Matematik">Matematik</option>
+            <option value="Tarih">Tarih</option>
+            <option value="Coğrafya">Coğrafya</option>
+            <option value="Vatandaşlık">Vatandaşlık</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="topicInput">KONU ANLATIMI / DETAY</label>
+          <input type="text" id="topicInput" class="form-control" placeholder="Örn: Cümlede Anlam, Sayılar vb.">
+        </div>
+
+        <div class="form-group">
+          <label for="questionsInput">ÇÖZÜLEN SORU SAYISI</label>
+          <input type="number" id="questionsInput" class="form-control" min="0" placeholder="Örn: 40">
+        </div>
+
+        <button class="btn btn-primary" id="saveLogBtn">Soru Çözümü Kaydet</button>
+      </div>
+
+      <!-- Ders Programı Planlama -->
+      <div class="panel">
+        <div class="panel-title">Ders Programı Planla</div>
+        <p style="color:var(--muted); font-size:12.5px; margin-bottom:14px;">Index panelinde çalıştığınız derslerin konuları buraya otomatik gelir.</p>
+        
+        <div class="form-group">
+          <label for="progDaySelect">GÜN</label>
+          <select id="progDaySelect">
+            <option value="Pazartesi">Pazartesi</option>
+            <option value="Salı">Salı</option>
+            <option value="Çarşamba">Çarşamba</option>
+            <option value="Perşembe">Perşembe</option>
+            <option value="Cuma">Cuma</option>
+            <option value="Cumartesi">Cumartesi</option>
+            <option value="Pazar">Pazar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="progSubjectSelect">DERS</label>
+          <select id="progSubjectSelect">
+            <option value="Türkçe">Türkçe</option>
+            <option value="Matematik">Matematik</option>
+            <option value="Tarih">Tarih</option>
+            <option value="Coğrafya">Coğrafya</option>
+            <option value="Vatandaşlık">Vatandaşlık</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="progTopicSelect">KONU SEÇ (INDEX PANELDEN ÇEKİLEN)</label>
+          <select id="progTopicSelect">
+            <!-- Topics will be dynamically populated here when subject is chosen -->
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="saveProgBtn">Ders Programına Ekle</button>
+      </div>
+
+      <!-- Geçmiş Haftalar -->
+      <div class="panel">
+        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Geçmiş Haftalar Arşivi</span>
+          <button class="btn-ghost" id="exportWeeklyBtn" style="font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer;">📊 Excel'e Aktar</button>
+        </div>
+        <div class="archive-list" id="archiveList">
+          <!-- Archived weeks will be listed here -->
+        </div>
+      </div>
+
+      <!-- Tamamlanan Görevler Arşivi -->
+      <div class="panel">
+        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Tamamlanan Görevler Arşivi</span>
+          <button class="btn-ghost" id="exportTasksBtn" style="font-size:11px; padding:4px 8px; border-radius:6px; cursor:pointer;">📊 Excel'e Aktar</button>
+        </div>
+        <p style="color:var(--muted); font-size:12.5px; margin-bottom:14px;">Index sayfasında tamamladığınız günlük görevleriniz burada listelenir.</p>
+        <div class="archive-list" id="taskArchiveList" style="max-height: 200px; overflow-y: auto;">
+          <!-- Archived tasks will render here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ KOLON: 7 GÜNLÜK ÇETELE VE PROGRAM PANORAMA -->
+    <div>
+      <!-- 7 Günlük Çetele Tablosu -->
+      <div class="panel" style="padding: 24px;">
+        <div class="panel-title">
+          <span id="currentWeekTitle">Soru Çözüm Çetelesi</span>
+          <button class="btn-archive" id="archiveWeekBtn">Mevcut Haftayı Arşivle</button>
+        </div>
+        
+        <div class="weekly-board" id="weeklyBoard">
+          <!-- Day cards will be dynamically rendered here -->
+        </div>
+
+        <!-- Renk Göstergeleri (Legend) -->
+        <div class="color-legend">
+          <div class="legend-item"><span class="legend-dot bg-turkce"></span><span class="c-turkce">Türkçe</span></div>
+          <div class="legend-item"><span class="legend-dot bg-matematik"></span><span class="c-matematik">Matematik</span></div>
+          <div class="legend-item"><span class="legend-dot bg-tarih"></span><span class="c-tarih">Tarih</span></div>
+          <div class="legend-item"><span class="legend-dot bg-cografya"></span><span class="c-cografya">Coğrafya</span></div>
+          <div class="legend-item"><span class="legend-dot bg-vatandaslik"></span><span class="c-vatandaslik">Vatandaşlık</span></div>
+        </div>
+      </div>
+
+      <!-- Haftalık Ders Programı Tablosu -->
+      <div class="panel" style="padding: 24px;">
+        <div class="panel-title">
+          <span>Haftalık Çalışma Programı (Yapmam Gerekenler)</span>
+          <button class="btn-archive" id="archiveScheduleBtn">Programı Arşivle</button>
+        </div>
+        
+        <div class="weekly-board" id="weeklyScheduleBoard">
+          <!-- Schedule cards will be dynamically rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);">
+    <span>Eğer çalışmazsan SÜRÜNECEKSİN</span>
+    <span style="font-size: 11px; color: var(--dim);">Site <a href="https://www.linkedin.com/in/revaztkn/" target="_blank" rel="noopener noreferrer" style="color: var(--muted); text-decoration: underline; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">Revaha</a> tarafından tasarlanmıştır</span>
+  </footer>
+</div>
+
+<!-- Modal Overlay for viewing archived weeks -->
+<div id="archiveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; padding:20px;">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; width:100%; max-width:550px; padding:24px; position:relative;">
+    <button onclick="closeArchiveModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer;">&times;</button>
+    <h2 id="archiveModalTitle" style="font-size:18px; color:var(--white); margin-bottom:16px;"></h2>
+    <div id="archiveModalContent" style="max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const DAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+const SUBJ_CLASSES = {
+  "Türkçe": "turkce",
+  "Matematik": "matematik",
+  "Tarih": "tarih",
+  "Coğrafya": "cografya",
+  "Vatandaşlık": "vatandaslik"
+};
+
+// Initial data states
+let studyLogs = [];
+let weeklySchedule = [];
+let archives = [];
+let userTopics = {};
+
+const defaultTopics = {
+  "Türkçe":["Sözcükte anlam","Cümlede anlam","Paragrafta anlam","Sözel mantık","Yazım kuralları","Noktalama","Ses bilgisi","Sözcük türleri","Cümle bilgisi"],
+  "Matematik":["Temel kavramlar","Sayılar","Bölünebilme","EBOB-EKOK","Denklemler","Rasyonel sayılar","Eşitsizlikler","Mutlak değer","Üslü sayılar","Köklü sayılar","Çarpanlara ayırma","Oran-orantı","Problemler","Kümeler","Permütasyon-kombinasyon","Olasılık","Tablo-grafik"],
+  "Tarih":["İslamiyet öncesi Türk tarihi","Türk-İslam devletleri","Osmanlı kuruluş","Osmanlı yükselme","Osmanlı duraklama","Osmanlı gerileme","20.yy başları","I.Dünya Savaşı","Kurtuluş Savaşı","Atatürk ilke ve inkılapları","Çağdaş dünya tarihi"],
+  "Coğrafya":["Türkiye coğrafi konumu","Yer şekilleri","İklim ve bitki örtüsü","Nüfus ve göç","Ekonomik faaliyetler","Bölgeler"],
+  "Vatandaşlık":["Hukukun temel kavramları","Anayasal gelişmeler","Temel haklar","Yasama","Yürütme","Yargı","İdare hukuku","Uluslararası kuruluşlar"]
+};
+
+// Map day index to day name
+function getCurrentDayName() {
+  const dayIdx = new Date().getDay(); // 0 is Sunday, 1 is Monday...
+  const mapped = [ "Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi" ];
+  return mapped[dayIdx];
+}
+
+// Calculate current week name label (e.g. Temmuz 4. Hafta)
+function getWeekLabel() {
+  const d = new Date();
+  const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  const mName = months[d.getMonth()];
+  const dateNum = d.getDate();
+  let weekNum = Math.ceil(dateNum / 7);
+  if (weekNum > 4) weekNum = 4;
+  return `${mName} ${weekNum}. Hafta`;
+}
+
+// Load data from localStorage
+function loadData() {
+  try {
+    studyLogs = JSON.parse(localStorage.getItem('kpss_weekly_study_tracker_v2') || '[]');
+    weeklySchedule = JSON.parse(localStorage.getItem('kpss_weekly_schedule_v1') || '[]');
+    archives = JSON.parse(localStorage.getItem('kpss_weekly_archives_v1') || '[]');
+  } catch(e) {
+    studyLogs = [];
+    weeklySchedule = [];
+    archives = [];
+  }
+}
+
+function saveLogs() { localStorage.setItem('kpss_weekly_study_tracker_v2', JSON.stringify(studyLogs)); }
+function saveSchedule() { localStorage.setItem('kpss_weekly_schedule_v1', JSON.stringify(weeklySchedule)); }
+function saveArchives() { localStorage.setItem('kpss_weekly_archives_v1', JSON.stringify(archives)); }
+
+// Fetch topics from index.html topic tracker storage (kpss_topics_v4)
+function loadUserTopics() {
+  try {
+    const raw = localStorage.getItem('kpss_topics_v4');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      Object.keys(parsed).forEach(subj => {
+        userTopics[subj] = parsed[subj].map(t => t.text);
+      });
+    } else {
+      userTopics = defaultTopics;
+    }
+  } catch(e) {
+    userTopics = defaultTopics;
+  }
+}
+
+function populateTopicsDropdown() {
+  const subj = document.getElementById('progSubjectSelect').value;
+  const dropdown = document.getElementById('progTopicSelect');
+  dropdown.innerHTML = '';
+  
+  const list = userTopics[subj] || defaultTopics[subj] || [];
+  list.forEach(topic => {
+    const opt = document.createElement('option');
+    opt.value = topic;
+    opt.textContent = topic;
+    dropdown.appendChild(opt);
+  });
+}
+
+// Render Soru Çözümü Board
+function renderBoard() {
+  const board = document.getElementById('weeklyBoard');
+  board.innerHTML = '';
+  const todayName = getCurrentDayName();
+
+  DAYS.forEach(day => {
+    const dayLogs = studyLogs.filter(log => log.day === day);
+    const dayTotalQuestions = dayLogs.reduce((sum, item) => sum + item.questions, 0);
+    const isToday = day === todayName;
+
+    const card = document.createElement('div');
+    card.className = `day-card${isToday ? ' today' : ''}`;
+    
+    let html = `
+      <div class="day-name">
+        <span>${day}</span>
+        <span class="day-total">${dayTotalQuestions} Soru</span>
+      </div>
+      <ul class="log-list">
+    `;
+
+    if (dayLogs.length === 0) {
+      html += `<div style="color:var(--muted); font-size:11px; text-align:center; margin:auto 0; font-style:italic;">Soru kaydı yok</div>`;
+    } else {
+      dayLogs.forEach(log => {
+        const cls = SUBJ_CLASSES[log.subject] || 'turkce';
+        html += `
+          <li class="log-item border-${cls}">
+            <span class="log-subject c-${cls}">${log.subject}</span>
+            <span class="log-topic" title="${escHtml(log.topic)}">${escHtml(log.topic)}</span>
+            <span class="log-questions">${log.questions} Soru</span>
+            <button class="log-del-btn" onclick="deleteLogEntry('${log.id}')">×</button>
+          </li>
+        `;
+      });
+    }
+
+    html += `</ul>`;
+    card.innerHTML = html;
+    board.appendChild(card);
+  });
+
+  document.getElementById('currentWeekTitle').textContent = `Soru Çözüm Çetelesi (${getWeekLabel()})`;
+}
+
+// Render Ders Programı
+function renderSchedule() {
+  const board = document.getElementById('weeklyScheduleBoard');
+  board.innerHTML = '';
+  const todayName = getCurrentDayName();
+
+  DAYS.forEach(day => {
+    const dayItems = weeklySchedule.filter(item => item.day === day);
+    const isToday = day === todayName;
+
+    const card = document.createElement('div');
+    card.className = `day-card${isToday ? ' today' : ''}`;
+    card.style.minHeight = '200px';
+    
+    let html = `
+      <div class="day-name">
+        <span>${day}</span>
+      </div>
+      <ul class="log-list">
+    `;
+
+    if (dayItems.length === 0) {
+      html += `<div style="color:var(--muted); font-size:11px; text-align:center; margin:auto 0; font-style:italic;">Plan eklenmedi</div>`;
+    } else {
+      dayItems.forEach(item => {
+        const cls = SUBJ_CLASSES[item.subject] || 'turkce';
+        html += `
+          <li class="schedule-item border-${cls}${item.done ? ' done' : ''}">
+            <div class="schedule-check" onclick="toggleScheduleItem('${item.id}')"></div>
+            <span class="schedule-text">
+              <strong class="c-${cls}" style="font-size:10px; text-transform:uppercase; display:block;">${item.subject}</strong>
+              ${escHtml(item.topic)}
+            </span>
+            <button class="log-del-btn" onclick="deleteScheduleItem('${item.id}')">×</button>
+          </li>
+        `;
+      });
+    }
+
+    html += `</ul>`;
+    card.innerHTML = html;
+    board.appendChild(card);
+  });
+}
+
+// Log Actions
+function addLogEntry(day, subject, topic, count) {
+  studyLogs.push({
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    day: day,
+    subject: subject,
+    topic: topic || "Genel Çalışma",
+    questions: Number(count) || 0
+  });
+  saveLogs();
+  renderBoard();
+}
+
+function deleteLogEntry(id) {
+  studyLogs = studyLogs.filter(log => log.id !== id);
+  saveLogs();
+  renderBoard();
+}
+
+// Schedule Actions
+function addScheduleEntry(day, subject, topic) {
+  weeklySchedule.push({
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    day: day,
+    subject: subject,
+    topic: topic,
+    done: false
+  });
+  saveSchedule();
+  renderSchedule();
+}
+
+function toggleScheduleItem(id) {
+  const item = weeklySchedule.find(i => i.id === id);
+  if (item) {
+    item.done = !item.done;
+    saveSchedule();
+    renderSchedule();
+  }
+}
+
+function deleteScheduleItem(id) {
+  weeklySchedule = weeklySchedule.filter(i => i.id !== id);
+  saveSchedule();
+  renderSchedule();
+}
+
+// Archive current week
+function archiveCurrentWeek() {
+  if (studyLogs.length === 0 && weeklySchedule.length === 0) {
+    alert("Arşivlemek için bu haftaya ait soru kaydı veya ders programı bulunmalıdır.");
+    return;
+  }
+  const label = getWeekLabel();
+  const totalQ = studyLogs.reduce((sum, item) => sum + item.questions, 0);
+  
+  if (confirm(`Mevcut haftayı (${label}) arşivlemek istiyor musunuz? Bu işlem aktif çetele tablosunu ve ders programını sıfırlayacaktır.`)) {
+    archives.push({
+      id: Date.now().toString(),
+      label: label + " (" + new Date().toLocaleDateString('tr-TR') + ")",
+      totalQuestions: totalQ,
+      logs: studyLogs,
+      schedule: weeklySchedule
+    });
+    saveArchives();
+    
+    // Reset active logs
+    studyLogs = [];
+    saveLogs();
+    
+    // Reset active weekly schedule
+    weeklySchedule = [];
+    saveSchedule();
+    
+    renderBoard();
+    renderSchedule();
+    renderArchiveList();
+  }
+}
+
+function renderArchiveList() {
+  const list = document.getElementById('archiveList');
+  list.innerHTML = '';
+  
+  if (archives.length === 0) {
+    list.innerHTML = `<div style="color:var(--muted); font-size:12px; font-style:italic;">Arşivlenmiş hafta yok</div>`;
+    return;
+  }
+
+  archives.forEach(arch => {
+    const item = document.createElement('div');
+    item.className = 'archive-item';
+    item.innerHTML = `
+      <span class="archive-name">${arch.label}</span>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="archive-meta">${arch.totalQuestions} Soru</span>
+        <button class="log-del-btn" style="position:static; font-size:16px; padding:4px;" onclick="event.stopPropagation(); deleteArchive('${arch.id}');">×</button>
+      </div>
+    `;
+    item.addEventListener('click', () => showArchiveDetails(arch));
+    list.appendChild(item);
+  });
+}
+
+function deleteArchive(id) {
+  if (confirm("Bu arşivlenmiş haftayı kalıcı olarak silmek istediğinizden emin misiniz?")) {
+    archives = archives.filter(arch => arch.id !== id);
+    saveArchives();
+    renderArchiveList();
+  }
+}
+
+function showArchiveDetails(arch) {
+  const title = document.getElementById('archiveModalTitle');
+  const content = document.getElementById('archiveModalContent');
+  
+  title.textContent = `${arch.label} Detayları`;
+  
+  let html = `<div style="font-size:14px; margin-bottom:12px; color:var(--muted);">Toplam Çözülen: <strong>${arch.totalQuestions} Soru</strong></div>`;
+  
+  // Section for Questions Solved
+  html += `<h3 style="font-size:14px; color:var(--white); margin:15px 0 10px; border-bottom:1px solid var(--border); padding-bottom:4px;">📊 Soru Çözüm Çetelesi</h3>`;
+  
+  DAYS.forEach(day => {
+    const dayLogs = arch.logs.filter(log => log.day === day);
+    const daySum = dayLogs.reduce((sum, item) => sum + item.questions, 0);
+    
+    html += `
+      <div style="background:var(--surface2); padding:10px 14px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px;">
+        <div style="font-weight:700; color:var(--white); margin-bottom:6px; display:flex; justify-content:space-between; font-size:12.5px;">
+          <span>${day}</span>
+          <span style="font-family:DM Mono; font-size:11px; color:var(--muted);">${daySum} Soru</span>
+        </div>
+    `;
+    
+    if (dayLogs.length === 0) {
+      html += `<div style="color:var(--muted); font-size:11px; font-style:italic;">Soru kaydı yok</div>`;
+    } else {
+      html += `<ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:4px;">`;
+      dayLogs.forEach(l => {
+        html += `<li style="font-size:12px; color:var(--text);">- <strong>${l.subject}:</strong> ${escHtml(l.topic)} (${l.questions} Soru)</li>`;
+      });
+      html += `</ul>`;
+    }
+    html += `</div>`;
+  });
+
+  // Section for Study Schedule (Ders Programı)
+  html += `<h3 style="font-size:14px; color:var(--white); margin:25px 0 10px; border-bottom:1px solid var(--border); padding-bottom:4px;">📅 Haftalık Ders Programı</h3>`;
+  
+  const archSchedule = arch.schedule || [];
+  DAYS.forEach(day => {
+    const dayItems = archSchedule.filter(item => item.day === day);
+    html += `
+      <div style="background:var(--surface2); padding:10px 14px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px;">
+        <div style="font-weight:700; color:var(--white); margin-bottom:6px; font-size:12.5px;">
+          <span>${day}</span>
+        </div>
+    `;
+    
+    if (dayItems.length === 0) {
+      html += `<div style="color:var(--muted); font-size:11px; font-style:italic;">Ders programı yok</div>`;
+    } else {
+      html += `<ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:4px;">`;
+      dayItems.forEach(item => {
+        html += `<li style="font-size:12px; color:var(--text); ${item.done ? 'text-decoration:line-through;color:var(--muted);' : ''}">- <strong>${item.subject}:</strong> ${escHtml(item.topic)} ${item.done ? '(Tamamlandı)' : ''}</li>`;
+      });
+      html += `</ul>`;
+    }
+    html += `</div>`;
+  });
+  
+  content.innerHTML = html;
+  document.getElementById('archiveModal').style.display = 'flex';
+}
+
+function closeArchiveModal() {
+  document.getElementById('archiveModal').style.display = 'none';
+}
+
+function archiveScheduleOnly() {
+  if (weeklySchedule.length === 0) {
+    alert("Arşivlemek için ders programında en az bir plan bulunmalıdır.");
+    return;
+  }
+  const label = "Program: " + getWeekLabel();
+  if (confirm(`Mevcut ders programını (${label}) arşivlemek istiyor musunuz? Aktif program sıfırlanacaktır.`)) {
+    archives.push({
+      id: Date.now().toString(),
+      label: label + " (" + new Date().toLocaleDateString('tr-TR') + ")",
+      totalQuestions: 0,
+      logs: [],
+      schedule: weeklySchedule
+    });
+    saveArchives();
+    
+    weeklySchedule = [];
+    saveSchedule();
+    
+    renderSchedule();
+    renderArchiveList();
+  }
+}
+
+function renderTaskArchive() {
+  const list = document.getElementById('taskArchiveList');
+  if(!list) return;
+  list.innerHTML = '';
+  
+  let arch = [];
+  try {
+    arch = JSON.parse(localStorage.getItem('kpss_archived_tasks') || '[]');
+  } catch(e) {
+    arch = [];
+  }
+  
+  if (arch.length === 0) {
+    list.innerHTML = `<div style="color:var(--muted); font-size:12px; font-style:italic;">Tamamlanan görev yok</div>`;
+    return;
+  }
+  
+  arch.forEach((t, i) => {
+    const item = document.createElement('div');
+    item.className = 'archive-item';
+    item.style.cursor = 'default';
+    item.innerHTML = `
+      <span style="color:var(--text); text-decoration:line-through; font-size:12.5px;">${escHtml(t.text)}</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:10px; color:var(--muted); font-family:DM Mono;">${t.date}</span>
+        <button class="log-del-btn" style="position:static; font-size:16px; padding:4px;" onclick="deleteArchivedTask(${i})">×</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function deleteArchivedTask(index) {
+  if (confirm("Bu arşivlenmiş görevi kalıcı olarak silmek istiyor musunuz?")) {
+    let arch = [];
+    try {
+      arch = JSON.parse(localStorage.getItem('kpss_archived_tasks') || '[]');
+      arch.splice(index, 1);
+      localStorage.setItem('kpss_archived_tasks', JSON.stringify(arch));
+    } catch(e){}
+    renderTaskArchive();
+  }
+}
+
+function escHtml(s){
+  const d=document.createElement('div');
+  d.textContent=s;
+  return d.innerHTML;
+}
+
+// DOM Listeners
+document.getElementById('saveLogBtn').addEventListener('click', () => {
+  const day = document.getElementById('daySelect').value;
+  const subject = document.getElementById('subjectSelect').value;
+  const topic = document.getElementById('topicInput').value.trim();
+  const questions = Number(document.getElementById('questionsInput').value) || 0;
+
+  addLogEntry(day, subject, topic, questions);
+  
+  // Clear inputs
+  document.getElementById('topicInput').value = '';
+  document.getElementById('questionsInput').value = '';
+});
+
+document.getElementById('saveProgBtn').addEventListener('click', () => {
+  const day = document.getElementById('progDaySelect').value;
+  const subject = document.getElementById('progSubjectSelect').value;
+  const topic = document.getElementById('progTopicSelect').value;
+
+  if (!topic) {
+    alert("Ders programına eklemek için bir konu seçmelisiniz.");
+    return;
+  }
+
+  addScheduleEntry(day, subject, topic);
+});
+
+document.getElementById('progSubjectSelect').addEventListener('change', populateTopicsDropdown);
+document.getElementById('archiveWeekBtn').addEventListener('click', archiveCurrentWeek);
+document.getElementById('archiveScheduleBtn').addEventListener('click', archiveScheduleOnly);
+
+// Init
+(function(){
+  loadData();
+  loadUserTopics();
+  
+  // Default day selections
+  const currentDay = getCurrentDayName();
+  const daySelect = document.getElementById('daySelect');
+  const progDaySelect = document.getElementById('progDaySelect');
+  
+  if (DAYS.includes(currentDay)) {
+    daySelect.value = currentDay;
+    progDaySelect.value = currentDay;
+  }
+  
+  populateTopicsDropdown();
+  renderBoard();
+  renderSchedule();
+  renderArchiveList();
+  renderTaskArchive();
+})();
+
+window.addEventListener('focus', () => {
+  loadData();
+  renderSchedule();
+  renderTaskArchive();
+});
+
+// Theme Manager
+document.querySelectorAll('.theme-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.body.className = '';
+    const theme = dot.dataset.theme;
+    if (theme !== 'dark') {
+      document.body.classList.add('theme-' + theme);
+    }
+    localStorage.setItem('kpss_user_theme', theme);
+    document.querySelectorAll('.theme-dot').forEach(d => {
+      d.style.borderColor = (d === dot) ? '#e8e8e8' : '#222';
+      d.classList.toggle('active', d === dot);
+    });
+  });
+});
+(function loadTheme() {
+  const saved = localStorage.getItem('kpss_user_theme') || 'dark';
+  const dot = document.querySelector(`.theme-dot[data-theme="${saved}"]`);
+  if (dot) dot.click();
+})();
+
+
+// CSV Export System
+function downloadCSV(filename, headers, rows) {
+  const delimiter = ";";
+  const clean = val => {
+    if (val === null || val === undefined) return '';
+    let str = String(val);
+    str = str.replace(/"/g, '""');
+    if (str.includes(delimiter) || str.includes('\n') || str.includes('"')) {
+      str = `"${str}"`;
+    }
+    return str;
+  };
+  
+  let csvContent = headers.map(clean).join(delimiter) + "\r\n";
+  rows.forEach(row => {
+    csvContent += row.map(clean).join(delimiter) + "\r\n";
+  });
+  
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+document.getElementById('exportWeeklyBtn').addEventListener('click', () => {
+  try {
+    const archives = JSON.parse(localStorage.getItem('kpss_weekly_archives_v1') || '[]');
+    if (archives.length === 0) {
+      alert("Dışa aktarılacak haftalık arşiv bulunmamaktadır.");
+      return;
+    }
+    
+    const headers = ["Hafta", "Arşivlenme Tarihi", "Ders", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar", "Haftalık Toplam"];
+    const rows = [];
+    
+    const subjectsList = ["Türkçe", "Matematik", "Tarih", "Coğrafya", "Vatandaşlık"];
+    
+    archives.forEach(arch => {
+      const logs = arch.logs || [];
+      subjectsList.forEach(subject => {
+        const daysQuestions = [0, 0, 0, 0, 0, 0, 0];
+        DAYS.forEach((day, dIdx) => {
+          const daySubjectLogs = logs.filter(l => l.day === day && l.subject === subject);
+          const sum = daySubjectLogs.reduce((acc, curr) => acc + curr.questions, 0);
+          daysQuestions[dIdx] = sum;
+        });
+        const total = daysQuestions.reduce((a, b) => a + b, 0);
+        
+        let weekTitle = arch.label || "";
+        let archivedAt = "";
+        const dateMatch = weekTitle.match(/\(([^)]+)\)/);
+        if (dateMatch) {
+          archivedAt = dateMatch[1];
+          weekTitle = weekTitle.replace(/\s*\([^)]+\)/, "");
+        }
+        
+        rows.push([
+          weekTitle,
+          archivedAt,
+          subject,
+          daysQuestions[0], daysQuestions[1], daysQuestions[2], daysQuestions[3], daysQuestions[4], daysQuestions[5], daysQuestions[6],
+          total
+        ]);
+      });
+    });
+    
+    downloadCSV("kpss_haftalik_soru_cozum_arsivi.csv", headers, rows);
+  } catch(e) {
+    alert("Hata: " + e.message);
+  }
+});
+
+document.getElementById('exportTasksBtn').addEventListener('click', () => {
+  try {
+    const tasks = JSON.parse(localStorage.getItem('kpss_archived_tasks') || '[]');
+    if (tasks.length === 0) {
+      alert("Dışa aktarılacak tamamlanmış görev kaydı bulunmamaktadır.");
+      return;
+    }
+    const headers = ["Görev Açıklaması", "Tamamlanma Tarihi"];
+    const rows = tasks.map(t => [t.text, t.date]);
+    downloadCSV("kpss_tamamlanan_gorevler.csv", headers, rows);
+  } catch(e) {
+    alert("Hata: " + e.message);
+  }
+});
+</script>
+</body>
+</html>

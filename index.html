@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPSS Çalışma Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;--surface:#0d0d0d;--surface2:#141414;
+    --border:#222;--border2:#2a2a2a;
+    --text:#e8e8e8;--muted:#666;--dim:#3a3a3a;--white:#fff;
+    --color-turkce: #ef4444;
+    --color-matematik: #3b82f6;
+    --color-tarih: #f97316;
+    --color-cografya: #22c55e;
+    --color-vatandaslik: #a855f7;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:'DM Sans',system-ui,sans-serif;line-height:1.5;min-height:100vh;
+  }
+
+  .wrap{max-width:1100px;margin:0 auto;padding:40px 24px 80px;}
+
+  /* ─── HEADER ─── */
+  header{
+    border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:40px;
+  }
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  h1{font-family:'DM Sans',sans-serif;font-weight:700;font-size:clamp(26px,4vw,36px);margin:6px 0 4px;letter-spacing:-0.02em;}
+  header p{color:var(--muted);margin:0;font-size:14px;}
+
+  /* ─── SECTIONS ─── */
+  section{margin-bottom:64px;}
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
+  .section-num{font-family:'DM Mono',monospace;color:var(--muted);font-size:12px;}
+  .section-head h2{font-size:18px;font-weight:700;margin:0;letter-spacing:-0.01em;}
+
+  /* ─── COUNTDOWN ─── */
+  .exam-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.exam-grid{grid-template-columns:1fr;}}
+
+  .exam-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:22px 24px;display:block;text-decoration:none;color:inherit;
+    cursor:pointer;transition:border-color .15s;
+  }
+  .exam-card:hover{border-color:var(--dim);}
+  .exam-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .exam-name{font-weight:600;font-size:14px;}
+  .exam-badge{font-size:10px;padding:1px 7px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);letter-spacing:.03em;}
+  .exam-date{color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;margin-bottom:16px;}
+  .flip-row{display:flex;gap:8px;}
+  .flip-unit{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;text-align:center;padding:12px 2px 10px;min-width:0;}
+  .flip-num{font-weight:700;font-size:clamp(18px,3vw,24px);font-variant-numeric:tabular-nums;display:block;transition:opacity .15s;}
+  .flip-num.pulse{opacity:.5;}
+  .flip-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px;}
+  .exam-done{color:var(--text);font-weight:600;font-size:16px;margin-top:14px;}
+  .exam-link{font-size:11px;color:var(--muted);margin-top:10px;font-family:'DM Mono',monospace;}
+
+  /* ─── POMODORO ─── */
+  .pomo-layout{display:flex;justify-content:center;align-items:center;}
+  @media(max-width:860px){.pomo-layout{grid-template-columns:1fr;}}
+
+  .pomo-timer-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:32px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;
+    max-width:840px;width:100%;
+  }
+  .pomo-ring{width:130px;height:130px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--text) calc(var(--pct,0)*1%),var(--surface2) 0);flex-shrink:0;transition:background .3s linear;}
+  .pomo-ring-inner{width:104px;height:104px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  #pomoTime{font-weight:700;font-size:28px;font-variant-numeric:tabular-nums;}
+  #pomoPhase{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2.5px;}
+
+  .pomo-right{
+    flex:1;
+    min-width:280px;
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap:28px;
+    align-items:start;
+  }
+  @media(max-width:768px){
+    .pomo-right{
+      grid-template-columns: 1fr;
+      gap:20px;
+    }
+  }
+  .pomo-right>p{color:var(--muted);font-size:13px;margin:0 0 14px;}
+
+  .stats-row{display:flex;gap:18px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:14px 0;}
+  .stat-item{display:flex;flex-direction:column;gap:2px;}
+  .stat-val{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;}
+  .stat-lbl{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  button,.btn{font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;border-radius:8px;padding:9px 16px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:border-color .12s,background .12s;}
+  button:hover,.btn:hover{border-color:var(--dim);}
+  .btn-primary{background:var(--white);color:#000;border-color:var(--white);}
+  .btn-primary:hover{background:#e0e0e0;border-color:#e0e0e0;}
+  .btn-ghost{background:transparent;color:var(--muted);border-color:var(--border2);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--dim);}
+  .btn-ghost.active{background:var(--text);color:#000;border-color:var(--text);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .preset-chip{font-family:'DM Mono',monospace;font-size:12px;padding:7px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;transition:border-color .12s;user-select:none;}
+  .preset-chip:hover{border-color:var(--dim);}
+  .preset-chip.active{background:var(--text);color:#000;border-color:var(--text);}
+
+  /* ─── TASKS ─── */
+  .tasks-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .tasks-header{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .tasks-header span{color:var(--muted);font-weight:400;}
+  .tasks-list{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto;}
+  .tasks-list::-webkit-scrollbar{width:4px;}
+  .tasks-list::-webkit-scrollbar-track{background:transparent;}
+  .tasks-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  .task-item{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;transition:background .12s;}
+  .task-item:hover{background:var(--surface2);}
+  .task-item:last-child{border-bottom:none;}
+  .task-check{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+  .task-item.done .task-check{background:var(--text);border-color:var(--text);}
+  .task-item.done .task-check::after{content:'✓';font-size:9px;color:#000;}
+  .task-item.done .task-text{text-decoration:line-through;color:var(--muted);}
+  .task-text{flex:1;}
+  .task-pomo{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  .task-del{opacity:0;color:var(--muted);font-size:15px;transition:opacity .12s;line-height:1;}
+  .task-item:hover .task-del{opacity:1;}
+  .task-del:hover{color:var(--text);}
+
+  .add-task-row{display:flex;gap:6px;padding:11px 18px;border-top:1px solid var(--border);}
+  .add-task-row input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+  .add-task-row input::placeholder{color:var(--muted);}
+  .add-task-row input:focus{outline:none;border-color:var(--dim);}
+  .add-task-row button{padding:8px 14px;font-size:12px;}
+
+  /* ─── NOTES GRID ─── */
+  .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  @media(max-width:720px){.notes-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:460px){.notes-grid{grid-template-columns:1fr;}}
+
+  .note-link{display:flex;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-weight:600;font-size:13.5px;color:var(--text);transition:border-color .15s,background .15s;}
+  .note-link:hover{border-color:var(--dim);background:var(--surface2);}
+  .note-link .arrow{color:var(--muted);font-family:'DM Mono',monospace;}
+
+  /* ─── TOPIC TRACKER ─── */
+  .topic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media(max-width:760px){.topic-grid{grid-template-columns:1fr;}}
+
+  .topic-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 16px 14px;}
+  .topic-card h3{font-size:15px;margin:0 0 2px;display:flex;align-items:center;justify-content:space-between;}
+  .topic-progress{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  ul.topic-list{list-style:none;margin:10px 0 10px;padding:0;display:flex;flex-direction:column;gap:5px;}
+  ul.topic-list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 11px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);border-left:3px solid #ef4444;font-size:12.5px;cursor:pointer;transition:background .12s,border-color .12s;user-select:none;}
+  ul.topic-list li:hover{border-color:var(--dim);}
+  ul.topic-list li .status-indicator{background:rgba(239,68,68,0.1);color:#ef4444;}
+  ul.topic-list li.done{background:var(--surface2);border-color:var(--border2);border-left:3px solid #22c55e;color:var(--text);text-decoration:none;}
+  ul.topic-list li.done .status-indicator{background:rgba(34,197,94,0.1);color:#22c55e;}
+
+  .add-topic-row{display:flex;gap:6px;}
+  .add-topic-row input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;}
+  .add-topic-row input::placeholder{color:var(--muted);}
+  .add-topic-row input:focus{outline:none;border-color:var(--dim);}
+  .add-topic-row button{padding:7px 12px;font-size:12px;}
+
+  /* ─── ÇIKMIŞ SORULAR (ÇETELE) ─── */
+  .cetele-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .cetele-tabs button {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 20px;
+    padding: 7px 18px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .cetele-tabs button:hover {
+    border-color: var(--dim);
+    color: var(--text);
+  }
+  .cetele-tabs button.active {
+    background: var(--text);
+    color: #000;
+    border-color: var(--text);
+  }
+  .cetele-table-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .cetele-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+  .cetele-table-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .cetele-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 3px;
+  }
+  .cetele-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+    text-align: left;
+  }
+  .cetele-table th, .cetele-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  .cetele-table th {
+    background: var(--surface);
+    font-weight: 700;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .cetele-table td {
+    color: var(--text);
+  }
+  .cetele-table tr:hover td {
+    background: rgba(255,255,255,0.02) !important;
+  }
+  .cetele-table tr.total-row td {
+    font-weight: 700;
+    background: var(--surface2) !important;
+    color: var(--white);
+    border-top: 1.5px solid var(--border);
+    border-bottom: none;
+  }
+  .cetele-table .topic-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    font-weight: 600;
+    border-right: 1px solid var(--border);
+    min-width: 180px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.15);
+  }
+  .cetele-table tr:nth-child(odd) td.topic-col {
+    background: #0d0d0d;
+  }
+  .cetele-table tr:nth-child(even) td.topic-col {
+    background: #111;
+  }
+  .cetele-table tr:nth-child(even) td {
+    background: rgba(255,255,255,0.01);
+  }
+  .cetele-table tr:hover td.topic-col {
+    background: var(--surface2) !important;
+  }
+  .cetele-table tr.total-row td.topic-col {
+    background: var(--surface2) !important;
+  }
+  .cetele-table td.val-cell {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .cetele-table th.val-header {
+    text-align: center;
+  }
+  .cetele-table td.val-muted {
+    color: var(--dim);
+  }
+  .cetele-table td.highlight-medium {
+    font-weight: 600;
+    color: var(--white);
+  }
+  .cetele-table td.highlight-high {
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255,255,255,0.08) !important;
+  }
+  .cetele-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .cetele-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-decoration: none;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.12s ease;
+  }
+  .cetele-link:hover {
+    color: var(--text);
+    border-color: var(--dim);
+  }
+
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:50px;font-family:'DM Mono',monospace;}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+  .c-turkce { color: var(--color-turkce); }
+  .c-matematik { color: var(--color-matematik); }
+  .c-tarih { color: var(--color-tarih); }
+  .c-cografya { color: var(--color-cografya); }
+  .c-vatandaslik { color: var(--color-vatandaslik); }
+
+  /* ─── THEMES ─── */
+  body.theme-sunset {
+    --bg:#1c0e05;--surface:#2b170b;--surface2:#3a2010;
+    --border:#4d2b15;--border2:#663b1e;
+    --text:#ffd3b3;--muted:#a37d63;--dim:#664933;--white:#fff2e6;
+  }
+  body.theme-emerald {
+    --bg:#05160e;--surface:#0a261a;--surface2:#123d2b;
+    --border:#1a543b;--border2:#267352;
+    --text:#ccffd9;--muted:#6da381;--dim:#3a7354;--white:#ebffef;
+  }
+  body.theme-sapphire {
+    --bg:#061124;--surface:#0b1c3a;--surface2:#122950;
+    --border:#1a386b;--border2:#264b8f;
+    --text:#ccd9ff;--muted:#6d84a3;--dim:#3a5a73;--white:#ebeeff;
+  }
+  body.theme-amethyst {
+    --bg:#11061c;--surface:#1e0b2e;--surface2:#2b1142;
+    --border:#3d1b5c;--border2:#542780;
+    --text:#eccdff;--muted:#956da3;--dim:#673a73;--white:#f9ebff;
+  }
+  body.theme-crimson {
+    --bg:#1a0505;--surface:#2b0b0b;--surface2:#3d1212;
+    --border:#541a1a;--border2:#732626;
+    --text:#ffcccc;--muted:#a86d6d;--dim:#753a3a;--white:#ffebeb;
+  }
+  body.theme-light {
+    --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+    --border:#e2e8f0;--border2:#cbd5e1;
+    --text:#0f172a;--muted:#64748b;--dim:#94a3b8;--white:#0f172a;
+  }
+  .theme-dot.active {
+    box-shadow: 0 0 0 2px var(--text) !important;
+  }
+  body.theme-light .btn-primary,
+  body.theme-light .preset-chip.active,
+  body.theme-light .btn-ghost.active,
+  body.theme-light button.active,
+  body.theme-light .task-item.done .task-check::after,
+  body.theme-light .cetele-tabs button.active {
+    color: #ffffff !important;
+  }
+  body.theme-light .cetele-table tr:nth-child(odd) td.topic-col {
+    background: var(--surface) !important;
+  }
+  body.theme-light .cetele-table tr:nth-child(even) td.topic-col {
+    background: var(--surface2) !important;
+  }
+  body.theme-light .cetele-table td.highlight-high {
+    color: #1e3a8a !important;
+    background: rgba(59, 130, 246, 0.16) !important;
+  }
+  body.theme-light .cetele-table td.highlight-medium {
+    color: #0f172a !important;
+    background: rgba(59, 130, 246, 0.06) !important;
+  }
+  body.theme-light .cetele-table tr:hover td.topic-col {
+    background: var(--surface2) !important;
+  }
+  body.theme-light .cetele-table tr.total-row td.topic-col {
+    background: var(--surface2) !important;
+  }
+  body.theme-light .cetele-table tr:hover td {
+    background: rgba(0, 0, 0, 0.03) !important;
+  }
+  body.theme-light .cetele-table tr:nth-child(even) td {
+    background: rgba(0, 0, 0, 0.01) !important;
+  }
+  body.theme-light .cetele-table td.val-muted {
+    color: var(--dim) !important;
+  }
+</style>
+</head>
+<body>
+<script src="auth.js"></script>
+<div class="wrap">
+
+  <header style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:40px;">
+    <div>
+      <div class="eyebrow">Kişisel Çalışma Paneli</div>
+      <h1 style="margin:6px 0 4px;">KPSS Çalışma Paneli</h1>
+      <p style="color:var(--muted); margin:0; font-size:14px;">Pişman olacağın şeyler yapma</p>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;" id="headerControlPanel">
+      <!-- Theme Switcher -->
+      <div class="theme-selector" style="display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:30px;">
+        <span style="font-size:11.5px; font-weight:600; color:var(--muted); margin-right:4px;">Tema:</span>
+        <button class="theme-dot active" data-theme="dark" style="width:18px; height:18px; border-radius:50%; background:#0c0c0c; border:1px solid #e8e8e8; cursor:pointer; padding:0; outline:none;" title="Midnight Dark"></button>
+        <button class="theme-dot" data-theme="sunset" style="width:18px; height:18px; border-radius:50%; background:#f97316; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sunset Orange"></button>
+        <button class="theme-dot" data-theme="emerald" style="width:18px; height:18px; border-radius:50%; background:#10b981; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Emerald Forest"></button>
+        <button class="theme-dot" data-theme="sapphire" style="width:18px; height:18px; border-radius:50%; background:#3b82f6; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Sapphire Blue"></button>
+        <button class="theme-dot" data-theme="amethyst" style="width:18px; height:18px; border-radius:50%; background:#a855f7; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Amethyst Purple"></button>
+        <button class="theme-dot" data-theme="crimson" style="width:18px; height:18px; border-radius:50%; background:#ef4444; border:1px solid #222; cursor:pointer; padding:0; outline:none;" title="Crimson Rose"></button>
+        <button class="theme-dot" data-theme="light" style="width:18px; height:18px; border-radius:50%; background:#ffffff; border:1px solid #cbd5e1; cursor:pointer; padding:0; outline:none;" title="Beyaz Tema"></button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hızlı Erişim Banner -->
+  <div class="nav-banner" style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 18px; margin-bottom:36px; overflow-x:auto; white-space:nowrap; scrollbar-width:none; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+    <a href="countdown.html" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">01</span>
+      <span>Sınav Sayacı</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="pomodoro.html" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">02</span>
+      <span>Pomodoro</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="tasks.html" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">03</span>
+      <span>Günlük Görevler</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="#sec-04" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">04</span>
+      <span>Notlarım</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="#sec-05" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">05</span>
+      <span>Sınav Konuları</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="#sec-06" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">06</span>
+      <span>Çıkmış Sorular</span>
+    </a>
+    <div style="width:1px; height:14px; background:var(--border); flex-shrink:0;"></div>
+    <a href="#sec-07" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='var(--surface2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='none'">
+      <span style="font-family:'DM Mono',monospace; color:var(--muted); font-size:11px;">07</span>
+      <span>Odak Müzikleri</span>
+    </a>
+  </div>
+
+  <!-- Misafir Hoş Geldin Karşılama Kartı -->
+  <div id="guestWelcomeCard" style="display: none; background: rgba(168, 85, 247, 0.03); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 16px; padding: 24px 28px; margin-bottom: 36px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.25); align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+    <!-- Ambient glow inside the card -->
+    <div style="position: absolute; width: 150px; height: 150px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); top: -50px; right: -50px; filter: blur(30px); z-index: 1;"></div>
+    
+    <div style="flex: 1; min-width: 280px; z-index: 2; text-align: left;">
+      <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">🚀 KPSS Karargâhı'na Hoş Geldin!</h3>
+      <p style="margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.6;">
+        Haftalık ders çalışma çetelelerini kaydetmek, Pomodoro seans istatistiklerini raporlamak ve tüm özellikleri sınırsız kullanmak için hemen ücretsiz üye ol veya giriş yap.
+      </p>
+    </div>
+    
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; z-index: 2;">
+      <button onclick="if(window.openAuthModal) window.openAuthModal();" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 24px; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; border: none; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1.5px)'; this.style.boxShadow='0 6px 20px rgba(168, 85, 247, 0.45)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(168, 85, 247, 0.3)';">
+        Giriş Yap / Üye Ol
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 01 SAYAC ── -->
+  <section id="sec-01">
+    <a href="countdown.html" style="text-decoration: none; color: inherit;">
+      <div class="section-head" style="cursor: pointer; transition: opacity 0.15s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+        <span class="section-num">01</span>
+        <h2>Sınav Tarihi Sayacı <span style="font-size:12.5px; font-weight:normal; color:var(--muted); margin-left:8px;">(Detaylı Sayaç Ekranı)</span></h2>
+      </div>
+    </a>
+    <div class="exam-grid">
+
+      <a class="exam-card" href="countdown.html">
+        <div class="exam-top">
+          <span class="exam-name">KPSS Ön Lisans 2026</span>
+          <span class="exam-badge">04 Ekim</span>
+        </div>
+        <div class="exam-date" id="date-onlisans"></div>
+        <div class="flip-row" id="cd-onlisans">
+          <div class="flip-unit"><span class="flip-num" data-u="d">00</span><span class="flip-label">Gün</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="h">00</span><span class="flip-label">Saat</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="m">00</span><span class="flip-label">Dak</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="s">00</span><span class="flip-label">Sn</span></div>
+        </div>
+        <div class="exam-link">Detaylı sayaç →</div>
+      </a>
+
+      <a class="exam-card" href="countdown.html">
+        <div class="exam-top">
+          <span class="exam-name">KPSS Ortaöğretim 2026</span>
+          <span class="exam-badge">25 Ekim</span>
+        </div>
+        <div class="exam-date" id="date-ortaogretim"></div>
+        <div class="flip-row" id="cd-ortaogretim">
+          <div class="flip-unit"><span class="flip-num" data-u="d">00</span><span class="flip-label">Gün</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="h">00</span><span class="flip-label">Saat</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="m">00</span><span class="flip-label">Dak</span></div>
+          <div class="flip-unit"><span class="flip-num" data-u="s">00</span><span class="flip-label">Sn</span></div>
+        </div>
+        <div class="exam-link">Detaylı sayaç →</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── 02 POMODORO ── -->
+  <section id="sec-02">
+    <a href="pomodoro.html" style="text-decoration: none; color: inherit;">
+      <div class="section-head" style="cursor: pointer; transition: opacity 0.15s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+        <span class="section-num">02</span>
+        <h2>Pomodoro <span style="font-size:12.5px; font-weight:normal; color:var(--muted); margin-left:8px;">(Detaylı Odaklanma Ekranı)</span></h2>
+      </div>
+    </a>
+    <div class="pomo-layout">
+
+      <!-- SOL: timer -->
+      <div class="pomo-timer-card">
+        <div class="pomo-ring" id="pomoRing">
+          <div class="pomo-ring-inner">
+            <span id="pomoTime">25:00</span>
+            <span id="pomoPhase">Hazır</span>
+          </div>
+        </div>
+        <div class="pomo-right">
+          <!-- Left Column: Süre & Presets -->
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <p style="margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5;">Çalış, ara, tekrar et. Ne kadar çalıştığını takip et.</p>
+            
+            <div class="btn-row" style="margin-bottom: 0;">
+              <button class="btn-primary" id="pomoStart">Başlat</button>
+              <button class="btn-ghost" id="pomoReset">Sıfırla</button>
+              <button class="btn-ghost stop-sound" id="stopSoundBtn" style="display:none; background:rgba(255,255,255,.04); border-color:#3a3a3a; color:var(--text);">Sesi Kapat</button>
+            </div>
+            
+            <div class="btn-row" style="margin-bottom: 0;">
+              <button class="btn-ghost active" data-type="work" id="modeWork">Çalışma</button>
+              <button class="btn-ghost" data-type="short" id="modeShort">Kısa Mola</button>
+              <button class="btn-ghost" data-type="long" id="modeLong">Uzun Mola</button>
+            </div>
+
+            <div class="btn-row" style="margin-bottom: 0;">
+              <button class="btn-ghost active" id="dirDownBtn" style="font-size:11.5px; padding:6px 12px;">⬇ Geriye Say</button>
+              <button class="btn-ghost" id="dirUpBtn" style="font-size:11.5px; padding:6px 12px;">⏱ 0'dan Başlat</button>
+            </div>
+
+            <div class="presets" id="pomoPresets" style="margin-top: 4px;">
+              <span class="preset-chip" data-min="5">5 dk</span>
+              <span class="preset-chip" data-min="10">10 dk</span>
+              <span class="preset-chip" data-min="15">15 dk</span>
+              <span class="preset-chip" data-min="20">20 dk</span>
+              <span class="preset-chip active" data-min="25">25 dk</span>
+              <span class="preset-chip" data-min="30">30 dk</span>
+              <span class="preset-chip" data-min="35">35 dk</span>
+              <span class="preset-chip" data-min="40">40 dk</span>
+            </div>
+
+            <div style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <input type="number" id="customPomoMin" placeholder="Özel Dk..." style="width: 90px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 10px; color: var(--text); font-family: DM Sans, sans-serif; font-size: 12.5px;" min="1" max="180">
+              <button class="btn-ghost" id="startCustomPomoBtn" style="padding: 8px 12px; font-size: 12.5px;">Başlat</button>
+            </div>
+          </div>
+          
+          <!-- Right Column: Alarm & Utilities -->
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <!-- Alarm Sesi ve Kontrolleri -->
+            <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; width: 100%;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px;">🔔 Alarm Ayarları</div>
+              
+              <div style="display:flex; gap:10px; align-items:center; width: 100%;">
+                <select id="soundSelect" style="flex:1; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:12.5px; outline:none; cursor:pointer;">
+                  <option value="kitchen">Alarm 1 (Uyarı)</option>
+                  <option value="bell">Alarm 2 (Zil / Çan Sesi)</option>
+                  <option value="bird">Alarm 3 (Kuş Sesi)</option>
+                  <option value="digital">Alarm 4 (Dijital Sinyal)</option>
+                  <option value="yok">Sessiz</option>
+                </select>
+                <button class="btn-ghost" id="testSoundBtn" style="padding: 8px 14px; font-size: 12.5px;">Test</button>
+              </div>
+              
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:11.5px; color:var(--muted); min-width:32px;">Ses:</span>
+                <input type="range" id="volSlider" min="0" max="100" value="70" style="flex:1; accent-color:var(--text); cursor:pointer; height:4px; border-radius:2px; background:var(--border2); border:none; outline:none;">
+                <span id="volVal" style="font-family:'DM Mono',monospace; font-size:11.5px; color:var(--muted); min-width:32px; text-align:right;">70%</span>
+              </div>
+            </div>
+
+            <!-- Diğer Butonlar -->
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+              <button class="btn-ghost" id="pipBtn" style="width: 100%; text-align: center; padding: 10px; cursor: pointer;">🗗 Mini Pencere</button>
+              <a href="pomodoro.html" class="btn btn-ghost" style="text-decoration:none; display:block; text-align:center; padding:10px; cursor: pointer;">Detaylı Pomodoro</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 03 GÜNLÜK GÖREVLER ── -->
+  <section id="sec-03">
+    <a href="tasks.html" style="text-decoration: none; color: inherit;">
+      <div class="section-head" style="cursor: pointer; transition: opacity 0.15s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+        <span class="section-num">03</span>
+        <h2>Günlük Görevler & Checklist <span style="font-size:12.5px; font-weight:normal; color:var(--muted); margin-left:8px;">(Detaylı Çetele Paneli)</span></h2>
+      </div>
+    </a>
+    <div class="tasks-panel">
+      <div class="tasks-header">Yapılacaklar Listesi <span id="taskCount">0 / 0</span></div>
+      <ul class="tasks-list" id="tasksList" style="max-height: 400px;"></ul>
+      <div class="add-task-row">
+        <input type="text" id="taskInput" placeholder="Bugün ne yapacaksın? Yeni görev ekle...">
+        <button id="addTaskBtn">Ekle</button>
+      </div>
+    </div>
+
+    <!-- HAFTALIK DERS PROGRAMI WIDGET -->
+    <div class="schedule-widget-panel" style="margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px;">
+      <div style="font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span>📅 Haftalık Çalışma Programı (Yapmam Gerekenler)</span>
+        <a href="tasks.html" style="font-size: 11px; color: var(--muted); text-decoration: none;">Düzenle</a>
+      </div>
+      <div class="weekly-board" id="indexScheduleBoard" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; overflow-x: auto;">
+        <!-- Days will render here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 04 NOTLARIM ── -->
+  <section id="sec-04">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Notlarım</h2>
+    </div>
+    <div class="notes-grid" id="notesLinks"></div>
+  </section>
+
+  <!-- ── 05 SINAV KONULARI ── -->
+  <section id="sec-05">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>Sınav Konuları</h2>
+    </div>
+    <div class="topic-grid" id="topicGrid"></div>
+  </section>
+
+  <!-- ── 06 ÇIKMIŞ SORULAR ── -->
+  <section id="sec-06">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>Çıkmış Soru Dağılımları</h2>
+    </div>
+    <div class="cetele-tabs">
+      <button class="active" data-subj="turkce" id="btnCeteleTurkce">Türkçe (2012-2024)</button>
+      <button data-subj="matematik" id="btnCeteleMatematik">Matematik (2012-2023)</button>
+      <button data-subj="tarih" id="btnCeteleTarih">Tarih (2012-2023)</button>
+      <button data-subj="cografya" id="btnCeteleCografya">Coğrafya (2012-2023)</button>
+      <button data-subj="vatandaslik" id="btnCeteleVatandaslik">Vatandaşlık (2012-2023)</button>
+    </div>
+    <div class="cetele-table-wrapper" id="ceteleTableWrapper"></div>
+  </section>
+
+  <!-- ── 07 ODAKLANMA MÜZİKLERİ ── -->
+  <section id="sec-07">
+    <div class="section-head">
+      <span class="section-num">07</span>
+      <h2>Odaklanma Müzikleri</h2>
+    </div>
+    
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+      <p style="color:var(--muted); font-size:13px; margin:0; line-height:1.6;">
+        Ders çalışırken odaklanmanı artıracak özel Spotify çalma listen. Doğrudan bu ekran üzerinden dinleyebilir veya aşağıdaki butonlarla Spotify uygulamasında ya da web tarayıcısında açabilirsin.
+      </p>
+      
+
+      <!-- Spotify Embed Player -->
+      <div style="width:100%; border-radius:12px; overflow:hidden; background:#121212;">
+        <iframe style="border-radius:12px; display:block;" src="https://open.spotify.com/embed/playlist/2zCHEjRkYcOX6osKCQzAa4?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+      
+      <!-- Launch buttons -->
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="spotify:playlist:2zCHEjRkYcOX6osKCQzAa4" class="btn" style="display:inline-flex; align-items:center; gap:8px; background:#1db954; color:#000; border-color:#1db954; font-weight:600; text-decoration:none; padding:10px 18px; border-radius:8px; font-size:13px; cursor:pointer;">
+          🟢 Spotify Uygulamasında Aç
+        </a>
+        <a href="https://open.spotify.com/playlist/2zCHEjRkYcOX6osKCQzAa4?si=db65635278614175" target="_blank" rel="noopener noreferrer" class="btn btn-ghost" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:10px 18px; border-radius:8px; font-size:13px; cursor:pointer;">
+          🌐 Web Tarayıcısında Aç ↗
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 08 YÖNETİCİ PANELİ ── -->
+  <section id="sec-admin" style="display: none; margin-top: 40px;">
+    <div class="section-head">
+      <span class="section-num">08</span>
+      <h2>Yönetici Kontrol Paneli</h2>
+    </div>
+    
+    <div class="tasks-panel" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div style="background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);">Toplam Kayıtlı Üye</span>
+          <span id="adminTotalUsers" style="font-size: 28px; font-weight: 700; font-family: 'DM Mono', monospace;">0</span>
+        </div>
+        <div style="background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);">Son Kayıt Tarihi</span>
+          <span id="adminLastReg" style="font-size: 14px; font-weight: 600; color: var(--text); padding-top: 10px;">-</span>
+        </div>
+      </div>
+      
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="font-size: 15px; font-weight: 600; margin: 0; color: #fff;">Kayıtlı Kullanıcı Listesi</h3>
+          <button class="btn-ghost" id="exportUsersBtn" style="padding: 6px 12px; font-size: 11.5px; display: inline-flex; align-items:center; gap:4px;">📥 Excel Olarak İndir</button>
+        </div>
+        
+        <div class="cetele-table-wrapper">
+          <table class="cetele-table" id="adminUsersTable">
+            <thead>
+              <tr>
+                <th>Kullanıcı Adı</th>
+                <th>E-Posta</th>
+                <th>Şifre</th>
+                <th>Kayıt Tarihi</th>
+                <th style="text-align: center;">İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dinamik olarak doldurulacaktır -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);">
+    <span>Eğer çalışmazsan SÜRÜNECEKSİN</span>
+    <span style="font-size: 11px; color: var(--dim);">Site <a href="https://www.linkedin.com/in/revaztkn/" target="_blank" rel="noopener noreferrer" style="color: var(--muted); text-decoration: underline; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">Revaha</a> tarafından tasarlanmıştır</span>
+  </footer>
+</div>
+
+<script>
+/* ══════════════════════ SAYAÇ ══════════════════════ */
+const EXAMS={
+  onlisans:{target:new Date(2026,9,4,10,15,0),dateLabel:"4 Ekim 2026 Pazar · 10:15"},
+  ortaogretim:{target:new Date(2026,9,25,10,15,0),dateLabel:"25 Ekim 2026 Pazar · 10:15 (tahmini)"}
+};
+document.getElementById('date-onlisans').textContent=EXAMS.onlisans.dateLabel;
+document.getElementById('date-ortaogretim').textContent=EXAMS.ortaogretim.dateLabel;
+function pad(n){return String(n).padStart(2,'0');}
+function setU(wrap,unit,val){
+  const el=wrap.querySelector('[data-u="'+unit+'"]');
+  if(!el)return;
+  if(el.textContent!==val){el.textContent=val;el.classList.add('pulse');setTimeout(()=>el.classList.remove('pulse'),150);}
+}
+function updateCD(key){
+  const wrap=document.getElementById('cd-'+key);
+  if(!wrap)return;
+  const diff=EXAMS[key].target.getTime()-Date.now();
+  if(diff<=0){wrap.outerHTML='<div class="exam-done" id="cd-'+key+'">Sınav günü. Başarılar!</div>';return;}
+  const s=Math.floor(diff/1000);
+  setU(wrap,'d',pad(Math.floor(s/86400)));
+  setU(wrap,'h',pad(Math.floor(s%86400/3600)));
+  setU(wrap,'m',pad(Math.floor(s%3600/60)));
+  setU(wrap,'s',pad(s%60));
+}
+function tickCD(){updateCD('onlisans');updateCD('ortaogretim');}
+tickCD();setInterval(tickCD,1000);
+
+/* ══════════════════════ POMODORO ══════════════════════ */
+let pomoTotal=25*60,pomoRemain=25*60,pomoRunning=false,pomoHandle=null,pomoPip=null;
+let pomoMode='work',volume=70;
+let totalToday=0,totalWeek=0,totalAll=0,totalWork=0,totalBreak=0;
+const pomoTime=document.getElementById('pomoTime');
+const pomoPhase=document.getElementById('pomoPhase');
+const pomoRing=document.getElementById('pomoRing');
+const pomoStart=document.getElementById('pomoStart');
+const pomoReset=document.getElementById('pomoReset');
+
+let pomoDir='down';
+function loadPomoDir(){
+  pomoDir=localStorage.getItem('kpss_pomo_dir')||'down';
+  const downBtn = document.getElementById('dirDownBtn');
+  const upBtn = document.getElementById('dirUpBtn');
+  if(downBtn && upBtn) {
+    downBtn.classList.toggle('active', pomoDir === 'down');
+    upBtn.classList.toggle('active', pomoDir === 'up');
+  }
+}
+function pado(n){return String(n).padStart(2,'0');}
+function pomoRender(){
+  let displaySec = pomoRemain;
+  if (pomoDir === 'up') {
+    displaySec = pomoTotal - pomoRemain;
+  }
+  const m=Math.floor(displaySec/60),s=displaySec%60;
+  pomoTime.textContent=pado(m)+':'+pado(s);
+  const pct=pomoTotal>0?((pomoTotal-pomoRemain)/pomoTotal)*100:0;
+  pomoRing.style.setProperty('--pct',pct.toFixed(2));
+  pomoPhase.textContent=pomoRunning?'Çalışıyor':pomoRemain===pomoTotal?'Hazır':'Duraklatıldı';
+  pomoStart.textContent=pomoRunning?'Duraklat':'Başlat';
+  if(pomoPip&&!pomoPip.closed){
+    const pt=pomoPip.document.getElementById('pipTime');
+    const pp=pomoPip.document.getElementById('pipPhase');
+    const pr=pomoPip.document.getElementById('pipRing');
+    const ps=pomoPip.document.getElementById('pipToggle');
+    if(pt)pt.textContent=pado(m)+':'+pado(s);
+    if(pp)pp.textContent=pomoPhase.textContent;
+    if(pr)pr.style.background='conic-gradient(#e8e8e8 ' + pct.toFixed(2) + '%, #141414 0)';
+    if(ps)ps.textContent=pomoRunning?'Duraklat':'Başlat';
+  }
+}
+
+let workStartRemain = pomoRemain;
+
+function savePomoState() {
+  localStorage.setItem('kpss_pomo_state', JSON.stringify({
+    remain: pomoRemain,
+    total: pomoTotal,
+    running: pomoRunning,
+    mode: pomoMode,
+    updatedAt: Date.now()
+  }));
+}
+
+function loadPomoState() {
+  try {
+    const raw = localStorage.getItem('kpss_pomo_state');
+    if (raw) {
+      const state = JSON.parse(raw);
+      pomoTotal = state.total || 1500;
+      pomoMode = state.mode || 'work';
+      
+      let curRemain = state.remain;
+      if (state.running) {
+        const diff = Math.floor((Date.now() - state.updatedAt) / 1000);
+        curRemain = Math.max(0, curRemain - diff);
+      }
+      pomoRemain = curRemain;
+      pomoRunning = state.running;
+      workStartRemain = pomoRemain;
+      
+      document.querySelectorAll('#modeWork,#modeShort,#modeLong').forEach(b => {
+        b.classList.toggle('active', b.dataset.type === pomoMode);
+      });
+      
+      const min = Math.round(pomoTotal / 60);
+      document.querySelectorAll('.preset-chip').forEach(c => {
+        c.classList.toggle('active', Number(c.dataset.min) === min);
+      });
+      
+      if (pomoRunning && pomoRemain > 0) {
+        if (!pomoHandle) pomoHandle = setInterval(pomoTick, 1000);
+      } else {
+        clearInterval(pomoHandle);
+        pomoHandle = null;
+        pomoRunning = false;
+      }
+      pomoRender();
+    }
+  } catch(e) {}
+}
+
+function autoSaveSession() {
+  const elapsed = workStartRemain - pomoRemain;
+  if (elapsed >= 5) {
+    addSession(pomoMode, elapsed);
+    workStartRemain = pomoRemain;
+    savePomoState();
+  }
+}
+
+function pomoTick(){
+  pomoRemain--;
+  savePomoState();
+  if(pomoRemain<=0){
+    pomoRemain=0;
+    pomoStop();
+    playAlarm_();
+    addSession(pomoMode, workStartRemain);
+    workStartRemain = 0;
+    savePomoState();
+    return;
+  }
+  pomoRender();
+}
+
+function pomoStart_(){
+  if(pomoRunning)return;
+  if(pomoRemain<=0) {
+    pomoRemain=pomoTotal;
+    workStartRemain=pomoTotal;
+  }
+  pomoRunning=true;
+  pomoHandle=setInterval(pomoTick,1000);
+  savePomoState();
+  pomoRender();
+}
+
+function pomoStop(){
+  pomoRunning=false;
+  clearInterval(pomoHandle);
+  pomoHandle=null;
+  autoSaveSession();
+  savePomoState();
+  pomoRender();
+}
+
+function pomoToggle(){pomoRunning?pomoStop():pomoStart_();}
+
+function pomoReset_(){
+  pomoStop();
+  pomoRemain=pomoTotal;
+  workStartRemain=pomoTotal;
+  stopAlarm();
+  savePomoState();
+  pomoRender();
+}
+
+function setMode(type,min){
+  autoSaveSession();
+  pomoMode=type;
+  document.querySelectorAll('#modeWork,#modeShort,#modeLong').forEach(b=>{
+    b.classList.toggle('active',b.dataset.type===type);
+  });
+  pomoTotal=min*60;pomoRemain=pomoTotal;
+  workStartRemain=pomoTotal;
+  pomoStop();stopAlarm();
+  savePomoState();
+  pomoRender();
+  document.querySelectorAll('.preset-chip').forEach(c=>c.classList.toggle('active',Number(c.dataset.min)===min));
+}
+document.getElementById('modeWork').addEventListener('click',()=>setMode('work',25));
+document.getElementById('modeShort').addEventListener('click',()=>setMode('short',5));
+document.getElementById('modeLong').addEventListener('click',()=>setMode('long',15));
+document.getElementById('pomoPresets').addEventListener('click',e=>{
+  const chip=e.target.closest('.preset-chip');
+  if(!chip)return;
+  const min=Number(chip.dataset.min);
+  setMode(pomoMode, min);
+});
+
+pomoStart.addEventListener('click',pomoToggle);
+pomoReset.addEventListener('click',pomoReset_);
+
+document.getElementById('startCustomPomoBtn').addEventListener('click', () => {
+  const customVal = Math.max(1, Math.min(180, Number(document.getElementById('customPomoMin').value) || Math.round(pomoTotal / 60)));
+  setMode(pomoMode, customVal);
+  pomoStart_();
+});
+
+document.getElementById('dirDownBtn').addEventListener('click', () => {
+  pomoDir = 'down';
+  localStorage.setItem('kpss_pomo_dir', 'down');
+  loadPomoDir();
+  pomoRender();
+});
+
+document.getElementById('dirUpBtn').addEventListener('click', () => {
+  pomoDir = 'up';
+  localStorage.setItem('kpss_pomo_dir', 'up');
+  loadPomoDir();
+  pomoRender();
+});
+
+/* ── ALARM ── */
+let alarmAudio = null;
+let alarmPlaying = false;
+let pomoSoundStyle = 'bell';
+
+const stopSoundBtn = document.getElementById('stopSoundBtn');
+const soundSelect = document.getElementById('soundSelect');
+const volSlider = document.getElementById('volSlider');
+const volVal = document.getElementById('volVal');
+const testSoundBtn = document.getElementById('testSoundBtn');
+
+function loadSoundSettings() {
+  pomoSoundStyle = localStorage.getItem('kpss_sound') || 'bell';
+  const v = localStorage.getItem('kpss_vol');
+  if (v) volume = Number(v);
+  
+  if (soundSelect) soundSelect.value = pomoSoundStyle;
+  if (volSlider) {
+    volSlider.value = volume;
+    if (volVal) volVal.textContent = volume + '%';
+  }
+}
+
+function playAlarm_() {
+  alarmPlaying = true;
+  loadSoundSettings();
+  if (stopSoundBtn) stopSoundBtn.style.display = 'inline-block';
+  if (pomoSoundStyle === 'yok') return;
+  
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+  }
+  
+  let src = "";
+  if (pomoSoundStyle === 'bell') src = 'audio/alarm2-can.mp3';
+  else if (pomoSoundStyle === 'bird') src = 'audio/alarm2kus.mp3';
+  else if (pomoSoundStyle === 'digital') src = 'audio/alarm3-digital.mp3';
+  else if (pomoSoundStyle === 'kitchen') src = 'audio/alarm1 sesli.mp3';
+  else return;
+  
+  alarmAudio = new Audio(src);
+  alarmAudio.loop = true;
+  alarmAudio.volume = volume / 100;
+  alarmAudio.play().catch(e => console.log("Alarm play failed:", e));
+}
+
+function stopAlarm() {
+  alarmPlaying = false;
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+  }
+  if (stopSoundBtn) stopSoundBtn.style.display = 'none';
+  if (testSoundBtn) testSoundBtn.textContent = 'Test';
+}
+
+if (stopSoundBtn) stopSoundBtn.addEventListener('click', stopAlarm);
+
+if (testSoundBtn) {
+  testSoundBtn.addEventListener('click', () => {
+    if (alarmPlaying) {
+      stopAlarm();
+    } else {
+      playAlarm_();
+      testSoundBtn.textContent = 'Durdur';
+    }
+  });
+}
+
+if (soundSelect) {
+  soundSelect.addEventListener('change', () => {
+    localStorage.setItem('kpss_sound', soundSelect.value);
+    loadSoundSettings();
+    if (alarmPlaying) {
+      playAlarm_();
+    }
+  });
+}
+
+if (volSlider) {
+  volSlider.addEventListener('input', () => {
+    volume = Number(volSlider.value);
+    if (volVal) volVal.textContent = volume + '%';
+    localStorage.setItem('kpss_vol', volume);
+    if (alarmAudio) {
+      alarmAudio.volume = volume / 100;
+    }
+  });
+}
+
+// Initial load
+loadSoundSettings();
+
+/* ── MİNİ PENCERE ── */
+async function openPip(){
+  if(pomoPip&&!pomoPip.closed){pomoPip.focus();return;}
+  if(!('documentPictureInPicture' in window)){alert('Tarayıcı desteklemiyor. Chrome/Edge güncel sürüm kullan.');return;}
+  pomoPip=await window.documentPictureInPicture.requestWindow({width:270,height:280});
+  [...document.styleSheets].forEach(s=>{try{const rules=[...s.cssRules].map(r=>r.cssText).join('\n');const st=pomoPip.document.createElement('style');st.textContent=rules;pomoPip.document.head.appendChild(st);}catch(e){}});
+  pomoPip.document.body.style.cssText='margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;font-family:DM Sans,sans-serif;color:#e8e8e8;';
+  const m=Math.floor(pomoRemain/60),s=pomoRemain%60;
+  const pct=pomoTotal>0?((pomoTotal-pomoRemain)/pomoTotal)*100:0;
+  
+  pomoPip.document.body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;">
+    <div id="pipRing" style="width:100px;height:100px;border-radius:50%;background:conic-gradient(#e8e8e8 ${pct}%,#141414 0);display:flex;align-items:center;justify-content:center;transition:background .3s;cursor:pointer;" title="Başlat / Duraklat">
+      <div style="width:80px;height:80px;border-radius:50%;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+        <span id="pipTime" style="font-weight:700;font-size:18px;">${pado(m)}:${pado(s)}</span>
+        <span id="pipPhase" style="font-size:8px;color:#666;text-transform:uppercase;margin-top:1px;">${pomoPhase.textContent}</span>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:6px;width:100%;">
+      <button id="pipWork" style="flex:1;padding:6px;background:#a855f7;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:11px;">Çalışma</button>
+      <button id="pipShort" style="flex:1;padding:6px;background:#6366f1;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:11px;">Kısa Mola</button>
+    </div>
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;border-top:1px solid #111;padding-top:6px;margin-top:2px;">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" id="pipCustomMin" min="1" max="180" style="width:42px;background:#111;border:1px solid #222;border-radius:4px;color:#fff;font-size:11px;text-align:center;padding:2px 0;" value="${Math.round(pomoTotal / 60)}">
+        <button id="pipApplyCustom" style="padding:2px 6px;background:#222;color:#fff;border:1px solid #333;border-radius:4px;font-size:9.5px;font-weight:600;cursor:pointer;">Uygula</button>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button id="pipToggle" style="padding:3px 8px;background:#fff;color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;">${pomoRunning?'Duraklat':'Başlat'}</button>
+        <button id="pipReset" style="padding:3px 6px;background:#111;color:#fff;border:1px solid #222;border-radius:4px;font-size:10px;cursor:pointer;">Sıfırla</button>
+      </div>
+    </div>
+  </div>`;
+  
+  pomoPip.document.getElementById('pipWork').addEventListener('click', () => {
+    setMode('work', 25);
+  });
+  pomoPip.document.getElementById('pipShort').addEventListener('click', () => {
+    setMode('short', 5);
+  });
+  pomoPip.document.getElementById('pipApplyCustom').addEventListener('click', () => {
+    const inputVal = Number(pomoPip.document.getElementById('pipCustomMin').value) || 25;
+    const cleanVal = Math.max(1, Math.min(180, inputVal));
+    setMode(pomoMode, cleanVal);
+  });
+  
+  pomoPip.document.getElementById('pipToggle').addEventListener('click', pomoToggle);
+  pomoPip.document.getElementById('pipRing').addEventListener('click', pomoToggle);
+  pomoPip.document.getElementById('pipReset').addEventListener('click', pomoReset_);
+  pomoPip.addEventListener('pagehide',()=>{pomoPip=null;});
+}
+document.getElementById('pipBtn').addEventListener('click',openPip);
+
+/* ── STATS ── */
+let todaySec=0,totalSecAll=0,workSec=0,breakSec=0;
+function formatTimeSec(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ' dk ' + s + ' sn';
+}
+function loadStats(){
+  try{const d=JSON.parse(localStorage.getItem('kpss_pomo_stats_v3')||'{}');
+    todaySec=d.todaySec||0;totalSecAll=d.totalSecAll||0;
+    workSec=d.workSec||0;breakSec=d.breakSec||0;
+  }catch(e){}
+  loadPomoDir();
+}
+function saveStats(){localStorage.setItem('kpss_pomo_stats_v3',JSON.stringify({todaySec,totalSecAll,workSec,breakSec}));}
+function refreshStats(){
+  const todayEl = document.getElementById('st-today');
+  const totalEl = document.getElementById('st-total');
+  const workEl = document.getElementById('st-work');
+  const breakEl = document.getElementById('st-break');
+  if(todayEl) todayEl.textContent=formatTimeSec(todaySec);
+  if(totalEl) totalEl.textContent=formatTimeSec(totalSecAll);
+  if(workEl) workEl.textContent=formatTimeSec(workSec);
+  if(breakEl) breakEl.textContent=formatTimeSec(breakSec);
+}
+function addSession(m,elapsedSeconds){
+  const secs=(elapsedSeconds!==undefined)?elapsedSeconds:pomoTotal;
+  if(m==='work'){
+    todaySec+=secs;totalSecAll+=secs;workSec+=secs;
+    const today=new Date().toDateString();
+    const last=localStorage.getItem('kpss_pomo_lastdate');
+    if(last!==today){todaySec=secs;localStorage.setItem('kpss_pomo_lastdate',today);}
+    saveStats();refreshStats();
+  } else {
+    breakSec+=secs;
+    saveStats();refreshStats();
+  }
+  logSession(m,secs);
+}
+loadStats();refreshStats();
+
+/* ── SESSION LOG ── */
+window.deleteSession = function(id) {
+  try {
+    let sessions = JSON.parse(localStorage.getItem('kpss_pomo_sess_v3') || '[]');
+    const targetSession = sessions.find(s => s.id === id);
+    if (!targetSession) return;
+    
+    const secs = targetSession.secs || 0;
+    const mode = targetSession.mode;
+    
+    let stats = JSON.parse(localStorage.getItem('kpss_pomo_stats_v3') || '{}');
+    let tSec = stats.todaySec || 0;
+    let tAll = stats.totalSecAll || 0;
+    let wSec = stats.workSec || 0;
+    let bSec = stats.breakSec || 0;
+    
+    if (mode === 'work') {
+      tSec = Math.max(0, tSec - secs);
+      tAll = Math.max(0, tAll - secs);
+      wSec = Math.max(0, wSec - secs);
+    } else {
+      bSec = Math.max(0, bSec - secs);
+    }
+    
+    todaySec = tSec;
+    totalSecAll = tAll;
+    workSec = wSec;
+    breakSec = bSec;
+    
+    localStorage.setItem('kpss_pomo_stats_v3', JSON.stringify({
+      todaySec,
+      totalSecAll,
+      workSec,
+      breakSec
+    }));
+    
+    sessions = sessions.filter(s => s.id !== id);
+    localStorage.setItem('kpss_pomo_sess_v3', JSON.stringify(sessions));
+    
+    refreshStats();
+    loadSessions();
+  } catch(e) {
+    console.error(e);
+  }
+};
+
+function logSession(m,secs){
+  const now=new Date(),time=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  const newId = Date.now() + "_" + Math.floor(Math.random() * 1000000);
+  try{
+    const sessions=JSON.parse(localStorage.getItem('kpss_pomo_sess_v3')||'[]');
+    sessions.push({id:newId,date:now.toDateString(),time,mode:m,secs:secs});
+    if(sessions.length>200)sessions.splice(0,sessions.length-200);
+    localStorage.setItem('kpss_pomo_sess_v3',JSON.stringify(sessions));
+  }catch(e){}
+  const list=document.getElementById('sessionList');
+  if(!list) return;
+  const item=document.createElement('li');item.className='session-item';
+  const labels={work:'Çalışma',short:'Kısa mola',long:'Uzun mola'};
+  item.innerHTML=`<span class="session-dot ${m}"></span><span>${labels[m]||m} (${formatTimeSec(secs)})</span><span class="session-time">${time}</span><button class="remove-x" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:14px; padding:0 4px; display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s; margin-left:8px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="deleteSession('${newId}')">&times;</button>`;
+  list.insertBefore(item,list.firstChild);
+  const countEl = document.getElementById('sessionCount');
+  if(countEl) countEl.textContent=list.children.length+' seans';
+}
+function loadSessions(){
+  const list=document.getElementById('sessionList');
+  if(!list) return;
+  try{
+    let sessions=JSON.parse(localStorage.getItem('kpss_pomo_sess_v3')||'[]');
+    let modified = false;
+    sessions.forEach(s => {
+      if (!s.id) {
+        s.id = Date.now() + "_" + Math.floor(Math.random() * 1000000);
+        modified = true;
+      }
+    });
+    if (modified) {
+      localStorage.setItem('kpss_pomo_sess_v3', JSON.stringify(sessions));
+    }
+    
+    const today=new Date().toDateString();
+    list.innerHTML='';
+    sessions.filter(s=>s.date===today).forEach(s=>{
+      const item=document.createElement('li');item.className='session-item';
+      const labels={work:'Çalışma',short:'Kısa mola',long:'Uzun mola'};
+      const secsStr=s.secs?` (${formatTimeSec(s.secs)})`:'';
+      item.innerHTML=`<span class="session-dot ${s.mode}"></span><span>${labels[s.mode]||s.mode}${secsStr}</span><span class="session-time">${s.time}</span><button class="remove-x" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:14px; padding:0 4px; display:inline-flex; align-items:center; opacity:0.6; transition:opacity 0.2s; margin-left:8px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="deleteSession('${s.id}')">&times;</button>`;
+      list.appendChild(item);
+    });
+    const countEl = document.getElementById('sessionCount');
+    if(countEl) countEl.textContent=list.children.length+' seans';
+  }catch(e){}
+}
+loadSessions();
+pomoRender();
+
+/* ══════════════════════ TASKS ══════════════════════ */
+let tasks=[];
+function loadTasks(){try{tasks=JSON.parse(localStorage.getItem('kpss_tasks2')||'[]');}catch(e){tasks=[];}}
+function saveTasks(){localStorage.setItem('kpss_tasks2',JSON.stringify(tasks));}
+function linkify(text) {
+  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
+  return text.replace(urlRegex, function(url) {
+    const href = url.startsWith('www.') ? 'https://' + url : url;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline; pointer-events: auto;">${url}</a>`;
+  });
+}
+function renderTasks(){
+  const list=document.getElementById('tasksList');
+  list.innerHTML='';
+  tasks.forEach((t,i)=>{
+    const li=document.createElement('li');
+    li.className='task-item'+(t.done?' done':'');
+    li.innerHTML=`<div class="task-check"></div><span class="task-text">${linkify(escHtml(t.text))}</span><span class="task-del" data-i="${i}">×</span>`;
+    li.addEventListener('click',e=>{
+      if(e.target.tagName === 'A') return;
+      if(e.target.classList.contains('task-del')){tasks.splice(i,1);saveTasks();renderTasks();refreshTaskCount();return;}
+      
+      // If task is ticked, archive it and remove from active list
+      tasks[i].done = !tasks[i].done;
+      if (tasks[i].done) {
+        try {
+          const arch = JSON.parse(localStorage.getItem('kpss_archived_tasks') || '[]');
+          arch.push({
+            text: tasks[i].text,
+            date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})
+          });
+          localStorage.setItem('kpss_archived_tasks', JSON.stringify(arch));
+        } catch(e){}
+        
+        // Remove from active list
+        tasks.splice(i, 1);
+      }
+      saveTasks();
+      renderTasks();
+    });
+    list.appendChild(li);
+  });
+  refreshTaskCount();
+}
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function refreshTaskCount(){const d=tasks.filter(t=>t.done).length;document.getElementById('taskCount').textContent=d+' / '+tasks.length;}
+document.getElementById('addTaskBtn').addEventListener('click',addTaskFn);
+document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTaskFn();});
+function addTaskFn(){
+  const v=document.getElementById('taskInput').value.trim();
+  if(!v)return;
+  tasks.push({text:v,done:false});saveTasks();renderTasks();
+  document.getElementById('taskInput').value='';
+}
+loadTasks();renderTasks();
+
+/* ══════════════════════ NOTLARIM ══════════════════════ */
+const NOTES=[
+  {name:"Matematik",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28MATEMAT%C4%B0K.one%7C12734f52-d9a9-4959-96da-9b20118caf2d%2FKONULAR%7C34b2bc06-85bc-497f-a441-154cddf6ce07%2F%29&wdorigin=NavigationUrl"},
+  {name:"Türkçe",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28Ads%C4%B1z%20B%C3%B6l%C3%BCm.one%7Ca7f92c60-ae99-4f9f-bf99-41333cd006b1%2FKONULAR%7Ca019cd9a-4b06-4ee0-bcbe-8ecc4d1015fd%2F%29&wdorigin=NavigationUrl"},
+  {name:"Tarih",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28TAR%C4%B0H.one%7C057be8ea-49ae-4c2a-b356-85f23c60c573%2FTP%20NOT%20ALDIKLARIM%7C33398554-dad7-4430-8971-c433ab7ba8e5%2F%29&wdorigin=NavigationUrl"},
+  {name:"Coğrafya",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28CO%C4%9ERAFYA.one%7C808761ad-6a0a-439d-b7e3-d8bbd2f3af54%2FAds%C4%B1z%20Sayfa%7Cdacac154-2709-4c2c-a5d2-7e4d96439b91%2F%29&wdorigin=NavigationUrl"},
+  {name:"Vatandaşlık",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28ANAYASA.one%7C946f889a-2bc3-45d0-895e-365d1fa11791%2FTP%20NOT%20ALDIKLARIM%7C27c24147-2252-4a21-ba65-89d029ef156e%2F%29&wdorigin=NavigationUrl"},
+  {name:"Güncel",url:"https://onedrive.live.com/personal/9d91fc0724ef76a6/_layouts/15/Doc.aspx?sourcedoc=%7B913dcaf4-0724-4920-ba8a-283e9e32a76d%7D&action=edit&wd=target%28G%C3%9CNCEL.one%7C1ba487fb-f66b-405f-99a7-4195efbca25f%2FTP%20NOT%20ALDIKLARIM%7C6c205ef2-dfeb-4691-a60b-2dedcecc800c%2F%29&wdorigin=NavigationUrl"}
+];
+const notesEl=document.getElementById('notesLinks');
+NOTES.forEach(n=>{
+  const a=document.createElement('a');a.className='note-link';a.href=n.url;a.target='_blank';a.rel='noopener noreferrer';
+  a.innerHTML=`<span>${n.name}</span><span class="arrow">↗</span>`;
+  notesEl.appendChild(a);
+});
+
+/* ══════════════════════ TOPIC TRACKER ══════════════════════ */
+const STORAGE_KEY='kpss_topics_v4';
+const DEFAULT_TOPICS={
+  "Türkçe":["Sözcükte anlam","Cümlede anlam","Paragrafta anlam","Sözel mantık","Yazım kuralları","Noktalama","Ses bilgisi","Sözcük türleri","Cümle bilgisi"],
+  "Matematik":["Temel kavramlar","Sayılar","Bölünebilme","EBOB-EKOK","Denklemler","Rasyonel sayılar","Eşitsizlikler","Mutlak değer","Üslü sayılar","Köklü sayılar","Çarpanlara ayırma","Oran-orantı","Problemler","Kümeler","Permütasyon-kombinasyon","Olasılık","Tablo-grafik"],
+  "Tarih":["İslamiyet öncesi Türk tarihi","Türk-İslam devletleri","Osmanlı kuruluş","Osmanlı yükselme","Osmanlı duraklama","Osmanlı gerileme","20.yy başları","I.Dünya Savaşı","Kurtuluş Savaşı","Atatürk ilke ve inkılapları","Çağdaş dünya tarihi"],
+  "Coğrafya":["Türkiye coğrafi konumu","Yer şekilleri","İklim ve bitki örtüsü","Nüfus ve göç","Ekonomik faaliyetler","Bölgeler"],
+  "Vatandaşlık":["Hukukun temel kavramları","Anayasal gelişmeler","Temel haklar","Yasama","Yürütme","Yargı","İdare hukuku","Uluslararası kuruluşlar"],
+  "Güncel":["Türkiye gündemi","Dünya gündemi","Uluslararası organizasyonlar"]
+};
+
+function loadTopics(){
+  try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}
+  const init={};
+  Object.keys(DEFAULT_TOPICS).forEach(k=>{init[k]=DEFAULT_TOPICS[k].map(t=>({text:t,done:false}));});
+  return init;
+}
+let topics=loadTopics();
+function saveTopics(){localStorage.setItem(STORAGE_KEY,JSON.stringify(topics));}
+const topicGrid=document.getElementById('topicGrid');
+
+function renderTopics(){
+  topicGrid.innerHTML='';
+  Object.keys(topics).forEach(subj=>{
+    const items=topics[subj];
+    const done=items.filter(i=>i.done).length;
+    const card=document.createElement('div');card.className='topic-card';
+    card.innerHTML=`<h3><span>${subj}</span><span class="topic-progress">${done}/${items.length}</span></h3><ul class="topic-list" id="tl-${subj.replace(/\s/g,'-')}"></ul>`;
+    topicGrid.appendChild(card);
+    const ul=card.querySelector('.topic-list');
+    items.forEach((item,idx)=>{
+      const li=document.createElement('li');
+      if(item.done)li.classList.add('done');
+      const statusIcon = item.done ? '✓' : '×';
+      li.innerHTML=`<span style="flex:1">${escHtml(item.text)}</span><span class="status-indicator" style="font-family:'DM Mono',monospace; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; margin-left:8px;">${statusIcon}</span>`;
+      li.addEventListener('click',e=>{
+        topics[subj][idx].done=!topics[subj][idx].done;saveTopics();renderTopics();
+      });
+      ul.appendChild(li);
+    });
+  });
+}
+renderTopics();
+
+/* ══════════════════════ ÇIKMIŞ SORULAR (ÇETELE) ══════════════════════ */
+const CETELE = {
+  turkce: {
+    years: [2012, 2014, 2016, 2018, 2020, 2022, 2023, 2024],
+    data: [
+      { topic: "Sözcükte Anlam", values: [2, 1, 1, 2, 1, 2, 2, 2] },
+      { topic: "Cümlede Anlam", values: [4, 3, 2, 1, 2, 1, 1, 1] },
+      { topic: "Sözcük Türleri", values: [1, 2, 1, 1, 1, 1, 1, 1] },
+      { topic: "Sözcükte Yapı", values: [1, 2, 1, 1, 1, 1, 1, 1] },
+      { topic: "Cümlenin Öğeleri", values: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Cümle Türleri", values: [1, 1, 1, "-", 1, "-", "-", "-"] },
+      { topic: "Dil Bilgisi Ses Olayları", values: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Yazım Kuralları", values: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Noktalama İşaretleri", values: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Anlatım Bozuklukları", values: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Paragrafta Anlam", values: [14, 13, 14, 15, 14, 15, 15, 15] },
+      { topic: "Paragrafta Anlatım Biçimleri", values: [1, "-", 1, 1, 1, 1, 1, 1] },
+      { topic: "Sözel Mantık", values: ["-", 4, 4, 1, 4, 4, 4, 4] }
+    ],
+    totals: [30, 30, 30, 30, 30, 30, 30, 30]
+  },
+  matematik: {
+    years: [2012, 2014, 2016, 2018, 2020, 2022, 2023],
+    data: [
+      { topic: "Temel Kavramlar", values: [1, 1, 1, "-", 1, "-", "-"] },
+      { topic: "Sayılar - Ebob-Ekok", values: [5, 3, 3, 3, 3, 3, 3] },
+      { topic: "Rasyonel Sayılar - Ondalık Sayılar", values: [2, 1, 2, 2, 2, 2, 2] },
+      { topic: "Basit Eşitsizlikler", values: [1, 1, 1, "-", 1, "-", "-"] },
+      { topic: "Mutlak Değer", values: ["-", 1, "-", 1, "-", 1, 1] },
+      { topic: "Üslü Sayılar", values: [2, 1, 2, 1, 2, 1, 1] },
+      { topic: "Köklü Sayılar", values: ["-", "-", "-", 1, "-", "-", "-"] },
+      { topic: "Faktöriyel", values: ["-", "-", "-", "-", "-", 2, 2] },
+      { topic: "Çarpanlara Ayırma", values: [1, 1, 1, 2, 1, "-", "-"] },
+      { topic: "Oran - Orantı", values: [2, 1, 1, "-", 1, 1, 1] },
+      { topic: "Denklem Çözme", values: [2, 1, 1, 1, 1, 1, 1] },
+      { topic: "Sayı Problemleri", values: [1, 1, 2, 1, 2, 1, 1] },
+      { topic: "Kesir Problemleri", values: ["-", 1, 1, 1, 1, 1, 1] },
+      { topic: "Yaş Problemleri", values: ["-", 1, "-", 1, "-", 1, 1] },
+      { topic: "İşçi ve Havuz Problemleri", values: [1, 1, "-", 1, "-", 1, 1] },
+      { topic: "Hareket - Hız Problemleri", values: [1, 1, 1, 1, 1, "-", "-"] },
+      { topic: "Yüzde - Kar - Zarar Problemleri", values: [2, "-", 1, "-", 1, "-", "-"] },
+      { topic: "Karışım Problemleri", values: [1, "-", 1, "-", 1, "-", "-"] },
+      { topic: "Grafik Problemleri", values: [1, 2, 1, 2, 1, 2, 2] },
+      { topic: "Kümeler ve Problemleri", values: ["-", 1, 1, 2, 1, 2, 2] },
+      { topic: "Fonksiyonlar", values: ["-", 1, "-", 1, "-", 1, 1] },
+      { topic: "İşlem", values: ["-", 1, "-", "-", "-", "-", "-"] },
+      { topic: "Modüler Aritmetik", values: ["-", "-", "-", "-", "-", "-", "-"] },
+      { topic: "Permütasyon", values: [1, 1, "-", "-", "-", "-", "-"] },
+      { topic: "Kombinasyon", values: ["-", "-", 1, "-", 1, "-", "-"] },
+      { topic: "Olasılık", values: ["-", 1, 1, 1, 1, 1, 1] },
+      { topic: "Sayısal Mantık", values: [2, 2, 2, 3, 2, 3, 3] },
+      { topic: "Şekil Yetenek", values: ["-", 1, 1, "-", 1, "-", "-"] }
+    ],
+    totals: [27, 27, 27, 26, 25, 25, 25]
+  },
+  tarih: {
+    years: [2012, 2014, 2016, 2018, 2020, 2022, 2023],
+    data: [
+      { topic: "İslamiyet Öncesi Türk Tarihi", values: [1, "-", 1, "-", 1, "-", "-"] },
+      { topic: "İslamiyet Öncesi Türk Dev. Kültür Medeniyet", values: [3, 2, 2, 1, 2, 1, 1] },
+      { topic: "İlk Türk İslam Devletleri", values: [1, 1, 2, 1, 2, 1, 1] },
+      { topic: "İlk Türk İslam Dev. Kültür ve Medeniyet", values: [3, 1, 2, 2, 2, 2, 2] },
+      { topic: "Osmanlı Devleti Kuruluş ve Yükselme", values: [1, 2, 2, 1, 2, 1, 1] },
+      { topic: "17. Yüzyıl Osmanlı Dev. Duraklama", values: [1, "-", 3, 1, 3, 1, 1] },
+      { topic: "18. Yüzyıl Osmanlı Dev. Gerileme", values: [1, 2, "-", 1, "-", 1, 1] },
+      { topic: "19. Yüzyıl Osmanlı Dev. Dağılma", values: [1, 1, "-", 1, "-", 1, 1] },
+      { topic: "20. Yüzyıl Osmanlı Devleti", values: [2, 1, 1, 1, 1, 1, 1] },
+      { topic: "Osmanlı Devleti Kültür ve Medeniyet", values: [2, 2, 1, 4, 1, 4, 4] },
+      { topic: "Milli Mücadele Dönemi", values: [4, 4, 3, 4, 3, 4, 4] },
+      { topic: "İnkılap Tarihi", values: [5, 5, 3, 5, 3, 5, 5] },
+      { topic: "Atatürk Dönemi İç ve Dış Politikalar", values: [4, 3, 5, 1, 5, 1, 1] },
+      { topic: "Çağdaş Türk ve Dünya Tarihi", values: [1, 2, 2, 4, 2, 4, 4] }
+    ],
+    totals: [30, 27, 27, 27, 27, 27, 27]
+  },
+  cografya: {
+    years: [2012, 2014, 2016, 2018, 2020, 2022, 2023],
+    data: [
+      { topic: "Türkiye'nin Coğrafi Konumu", values: [1, 1, 1, 2, 1, 2, 2] },
+      { topic: "Türkiye'nin İklimi ve Bitki Örtüsü", values: [1, 2, 3, 2, 3, 2, 2] },
+      { topic: "Türkiye'nin Fiziki Özellikleri", values: [2, 4, 4, 4, 4, 4, 4] },
+      { topic: "Türkiye'de Nüfus ve Yerleşme", values: [2, 3, 2, 2, 2, 2, 2] },
+      { topic: "Tarım", values: [2, 1, 1, 1, 1, 1, 1] },
+      { topic: "Hayvancılık", values: [1, 1, "-", 1, "-", 1, 1] },
+      { topic: "Madenler ve Enerji Kaynakları", values: [2, 1, 2, 2, 2, 2, 2] },
+      { topic: "Sanayi ve Endüstri", values: [2, 1, "-", 1, "-", 1, 1] },
+      { topic: "Ulaşım", values: [1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Ticaret", values: [2, 2, 1, 1, 1, 1, 1] },
+      { topic: "Turizm", values: [1, 1, 1, 1, 1, 1, 1] },
+      { topic: "Bölgeler Coğrafyası", values: ["-", "-", 1, "-", 1, "-", "-"] }
+    ],
+    totals: [18, 18, 18, 18, 18, 18, 18]
+  },
+  vatandaslik: {
+    years: [2012, 2014, 2016, 2018, 2020, 2022, 2023],
+    data: [
+      { topic: "Temel Hukuk Kavramları", values: [3, 3, 3, 3, 3, 3, 3] },
+      { topic: "Anayasal Kavramlar", values: [1, "-", "-", "-", "-", "-", "-"] },
+      { topic: "Türk Anayasa Tarihi", values: ["-", "-", "-", "-", "-", "-", "-"] },
+      { topic: "Temel Hak ve Ödevler", values: [1, "-", "-", "-", "-", "-", "-"] },
+      { topic: "Yasama", values: [1, 1, "-", 1, "-", 1, 1] },
+      { topic: "Yürütme", values: [1, 2, 3, 2, 3, 2, 2] },
+      { topic: "Yargı", values: ["-", 1, "-", 1, "-", 1, 1] },
+      { topic: "İdare Hukuku", values: [2, 2, 3, 2, 3, 2, 2] }
+    ],
+    totals: [9, 9, 9, 9, 9, 9, 9]
+  }
+};
+
+let activeSubj = 'turkce';
+
+function renderCetele() {
+  const wrapper = document.getElementById('ceteleTableWrapper');
+  if (!wrapper) return;
+  
+  const current = CETELE[activeSubj];
+  
+  let html = `<table class="cetele-table">`;
+  html += `<thead><tr><th class="topic-col">Konu Başlığı</th>`;
+  current.years.forEach(yr => {
+    html += `<th class="val-header">${yr}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  
+  current.data.forEach(row => {
+    html += `<tr><td class="topic-col">${escHtml(row.topic)}</td>`;
+    row.values.forEach(val => {
+      let cellClass = 'val-cell';
+      if (val === '-') {
+        cellClass += ' val-muted';
+      } else if (typeof val === 'number') {
+        if (val >= 10) {
+          cellClass += ' highlight-high';
+        } else if (val >= 3) {
+          cellClass += ' highlight-medium';
+        }
+      }
+      html += `<td class="${cellClass}">${val}</td>`;
+    });
+    html += `</tr>`;
+  });
+  
+  html += `<tr class="total-row"><td class="topic-col">TOPLAM SORU SAYISI</td>`;
+  current.totals.forEach(tot => {
+    html += `<td class="val-cell">${tot}</td>`;
+  });
+  html += `</tr>`;
+  html += `</tbody></table>`;
+  
+  wrapper.innerHTML = html;
+}
+
+// Tab Olayları
+const subjs = ['turkce', 'matematik', 'tarih', 'cografya', 'vatandaslik'];
+subjs.forEach(s => {
+  const btn = document.getElementById('btnCetele' + s.charAt(0).toUpperCase() + s.slice(1));
+  if (btn) {
+    btn.addEventListener('click', () => switchCetele(s));
+  }
+});
+
+function switchCetele(subj) {
+  activeSubj = subj;
+  subjs.forEach(s => {
+    const btn = document.getElementById('btnCetele' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (btn) btn.classList.toggle('active', s === subj);
+  });
+  renderCetele();
+}
+
+function renderIndexSchedule() {
+  const board = document.getElementById('indexScheduleBoard');
+  if(!board) return;
+  board.innerHTML = '';
+  
+  let sched = [];
+  try {
+    sched = JSON.parse(localStorage.getItem('kpss_weekly_schedule_v1') || '[]');
+  } catch(e) {}
+  
+  const days = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+  const subjColors = {
+    "Türkçe": "turkce",
+    "Matematik": "matematik",
+    "Tarih": "tarih",
+    "Coğrafya": "cografya",
+    "Vatandaşlık": "vatandaslik"
+  };
+  const todayName = new Date().toLocaleDateString('tr-TR', {weekday: 'long'});
+  
+  days.forEach(day => {
+    const dayItems = sched.filter(item => item.day === day);
+    const isToday = (day === todayName || todayName.startsWith(day));
+    
+    const dayCol = document.createElement('div');
+    dayCol.style.cssText = `background:${isToday ? 'rgba(255,255,255,0.02)' : 'transparent'}; border:1px solid ${isToday ? 'var(--border2)' : 'var(--border)'}; border-radius:10px; padding:10px; min-height:120px; display:flex; flex-direction:column; min-width: 110px;`;
+    
+    let html = `<div style="font-size:11px; font-weight:700; color:${isToday ? 'var(--white)' : 'var(--muted)'}; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">${day}</div>`;
+    
+    html += `<ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:6px; flex:1;">`;
+    if(dayItems.length === 0) {
+      html += `<li style="font-size:10px; color:var(--muted); font-style:italic; margin:auto 0; text-align:center;">Boş</li>`;
+    } else {
+      dayItems.forEach(item => {
+        const cls = subjColors[item.subject] || 'turkce';
+        html += `
+          <li style="background:var(--surface2); border:1.5px solid var(--border); border-left:3px solid var(--color-${cls}); border-radius:6px; padding:6px 8px; font-size:10px; display:flex; flex-direction:column; gap:2px; ${item.done ? 'text-decoration:line-through; opacity:0.5;' : ''}">
+            <strong class="c-${cls}" style="font-size:8px; text-transform:uppercase; letter-spacing:0.03em;">${item.subject}</strong>
+            <span style="color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.topic}">${item.topic}</span>
+          </li>
+        `;
+      });
+    }
+    html += `</ul>`;
+    dayCol.innerHTML = html;
+    board.appendChild(dayCol);
+  });
+}
+
+renderCetele();
+renderIndexSchedule();
+loadPomoState();
+window.addEventListener('focus', () => {
+  loadPomoDir();
+  loadPomoState();
+  renderIndexSchedule();
+});
+
+// Theme Manager
+document.querySelectorAll('.theme-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.body.className = '';
+    const theme = dot.dataset.theme;
+    if (theme !== 'dark') {
+      document.body.classList.add('theme-' + theme);
+    }
+    localStorage.setItem('kpss_user_theme', theme);
+    document.querySelectorAll('.theme-dot').forEach(d => {
+      d.style.borderColor = (d === dot) ? '#e8e8e8' : '#222';
+      d.classList.toggle('active', d === dot);
+    });
+  });
+});
+(function loadTheme() {
+  const saved = localStorage.getItem('kpss_user_theme') || 'dark';
+  const dot = document.querySelector(`.theme-dot[data-theme="${saved}"]`);
+  if (dot) dot.click();
+})();
+
+
+/* ══════════════════════ YÖNETİCİ KONTROL PANELİ ══════════════════════ */
+function initAdminPanel() {
+  const currentUser = localStorage.getItem('kpss_auth_user');
+  const adminSec = document.getElementById('sec-admin');
+  if (currentUser === 'kedi' && adminSec) {
+    adminSec.style.display = 'block';
+    renderAdminUsers();
+    
+    const exportBtn = document.getElementById('exportUsersBtn');
+    if (exportBtn) exportBtn.addEventListener('click', exportUsersCSV);
+  }
+}
+
+function renderAdminUsers() {
+  const users = JSON.parse(localStorage.getItem('kpss_users') || '[]');
+  const totalEl = document.getElementById('adminTotalUsers');
+  if (totalEl) totalEl.textContent = users.length;
+  
+  const lastUser = users[users.length - 1];
+  const lastRegEl = document.getElementById('adminLastReg');
+  if (lastRegEl) lastRegEl.textContent = lastUser ? (lastUser.date || '-') : '-';
+  
+  const tbody = document.querySelector('#adminUsersTable tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding: 20px;">Henüz kayıtlı kullanıcı bulunmuyor.</td></tr>';
+    return;
+  }
+  
+  users.forEach((u, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight: 600;">${u.username}</td>
+      <td>${u.email || '-'}</td>
+      <td style="font-family: 'DM Mono', monospace; color: var(--muted);">${u.password}</td>
+      <td>${u.date || '-'}</td>
+      <td style="text-align: center;">
+        <button class="btn-ghost" onclick="window.deleteUser(${index})" style="padding: 4px 8px; font-size: 11px; border-color: rgba(239, 68, 68, 0.2); color: #ef4444; background: rgba(239, 68, 68, 0.05); cursor: pointer;">Sil</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.deleteUser = function(index) {
+  if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+    const users = JSON.parse(localStorage.getItem('kpss_users') || '[]');
+    users.splice(index, 1);
+    localStorage.setItem('kpss_users', JSON.stringify(users));
+    renderAdminUsers();
+  }
+};
+
+function exportUsersCSV() {
+  const users = JSON.parse(localStorage.getItem('kpss_users') || '[]');
+  let csv = '\uFEFF'; // BOM
+  csv += 'Kullanıcı Adı;E-Posta;Şifre;Kayıt Tarihi\r\n';
+  
+  users.forEach(u => {
+    csv += `"${u.username}";"${u.email || ''}";"${u.password}";"${u.date || ''}"\r\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "kpss_kayitli_kullanicilar.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function initGuestWelcomeCard() {
+  const role = localStorage.getItem('kpss_auth_role');
+  const card = document.getElementById('guestWelcomeCard');
+  if (card) {
+    if (role === 'admin') {
+      card.style.display = 'none';
+    } else {
+      card.style.display = 'flex';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initAdminPanel();
+  initGuestWelcomeCard();
+});
+</script>
+</body>
+</html>
